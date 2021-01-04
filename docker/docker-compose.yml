@@ -1,8 +1,8 @@
 version: '3'
 
-#volumes:
-#  db-volume:
-#  symfony_backend_vendor:
+volumes:
+  db-volume:
+  symfony_backend_vendor:
 
 services:
   db:
@@ -46,14 +46,14 @@ services:
     build:
       context: ../symfony_backend
       dockerfile: ../docker/images/symfony/Dockerfile
-#    env_file:
-#      - ../symfony_backend/.env
+    env_file:
+      - ../symfony_backend/.env
 #    environment:
 #      SALT: "${SALT:-secureSalt}"
-#    depends_on:
-#      - db
+    depends_on:
+      - db
     ports:
       - 80:80
     volumes:
       - ../symfony_backend:/var/www/html
-#      - symfony_backend_vendor:/var/www/html/vendor
+      - symfony_backend_vendor:/var/www/html/vendor

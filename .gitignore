@@ -1,0 +1,7 @@
+/.idea
+/docker/.env
+/symfony_backend/.env
+/docker/.idea
+/db/.idea
+/symfony_backend/.idea
+
