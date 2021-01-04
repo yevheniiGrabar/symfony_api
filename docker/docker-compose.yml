@@ -1,0 +1,59 @@
+version: '3'
+
+#volumes:
+#  db-volume:
+#  symfony_backend_vendor:
+
+services:
+  db:
+    build:
+      context: ../db
+      dockerfile: Dockerfile
+      args:
+        MYSQL_DATABASE: "${MYSQL_DATABASE:-db}"
+        MYSQL_USER: "${MYSQL_USER:-homestead}"
+        MYSQL_PASSWORD: "${MYSQL_PASSWORD:-secret}"
+        MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-secret}"
+        SYSTEM_TZ: "${SYSTEM_TZ:-Europe/Kiev}"
+    environment:
+      TZ: "${SYSTEM_TZ:-Europe/Kiev}"
+    ports:
+      - 3306:3306
+    volumes:
+      - db-volume:/var/lib/mysql2
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db
+    environment:
+      MYSQL_USER: "${MYSQL_USER:-homestead}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-secret}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-secret}"
+      TZ: "${SYSTEM_TZ:-Europe/Kiev}"
+    ports:
+      - 8080:80
+
+  baseimg:
+    build:
+      context: images/base
+      dockerfile: Dockerfile
+      args:
+        SYSTEM_TZ: "${SYSTEM_TZ:-Europe/Kiev}"
+    image: baseimg
+
+  symfony_backend:
+    build:
+      context: ../symfony_backend
+      dockerfile: ../docker/images/symfony/Dockerfile
+#    env_file:
+#      - ../symfony_backend/.env
+#    environment:
+#      SALT: "${SALT:-secureSalt}"
+#    depends_on:
+#      - db
+    ports:
+      - 80:80
+    volumes:
+      - ../symfony_backend:/var/www/html
+#      - symfony_backend_vendor:/var/www/html/vendor
