@@ -6,14 +6,15 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository", repositoryClass=UserRepository::class)
  */
-class User extends EntityInterface
+class User implements EntityInterface
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @var int|null
      */
     private $id;
 
@@ -24,7 +25,7 @@ class User extends EntityInterface
     private $name;
 
     /**
-     * @ORM\Column(type="string", length=255,unique=true)
+     * @ORM\Column(type="string", length=255, unique=true)
      * @var string
      */
     private $email;
@@ -119,6 +120,17 @@ class User extends EntityInterface
     }
 
     /**
+     * @param Role $role
+     * @return $this
+     */
+    public function getRole(Role $role): User
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getRoles(): array
@@ -139,35 +151,6 @@ class User extends EntityInterface
      */
     public function eraseCredentials(): self
     {
-        return $this;
-    }
-
-    /**
-     * @param User $user
-     * @return $this
-     */
-    public function addUser(User $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
-            $user->setRole($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param User $user
-     * @return $this
-     */
-    public function removeUser(User $user): self
-    {
-        if ($this->users->removeElement($user)) {
-            if ($user->getRole() === $this) {
-                $user->setRole(null);
-            }
-        }
-
         return $this;
     }
 }

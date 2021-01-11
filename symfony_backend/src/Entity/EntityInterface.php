@@ -4,7 +4,7 @@
 namespace App\Entity;
 
 
-class EntityInterface
+interface EntityInterface
 {
 
 }

@@ -2,10 +2,10 @@
 
 namespace App\Repository;
 
-use App\Entity\User;
+use App\Entity\AccessToken;
 use Doctrine\Persistence\ManagerRegistry;
 
-class UserRepository extends AbstractRepository
+class AccessTokenRepository extends AbstractRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -17,7 +17,6 @@ class UserRepository extends AbstractRepository
      */
     protected function getModel(): string
     {
-        return User::class;
+        return AccessToken::class;
     }
 }
-
