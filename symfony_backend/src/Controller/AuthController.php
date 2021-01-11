@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Requests\UserRequest;
 use App\Responses\UserResponse;
+use App\Responses\UserResponseSetter;
 use App\Services\JsonRequestDataKeeper;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -37,19 +38,23 @@ class AuthController extends AbstractController
     /** @var AuthenticationSuccessHandler */
     private $authHandler;
 
+    /** @var UserResponseSetter */
+    private $userResponseSetter;
+
     public function __construct
     (
         UserRepository $userRepository,
         UserRequest $userRequest,
-        UserResponse $userResponse,
         JWTTokenManagerInterface $tokenManager,
-        AuthenticationSuccessHandler $authHandler
-    ) {
+        AuthenticationSuccessHandler $authHandler,
+        UserResponseSetter $userResponseSetter
+    )
+    {
         $this->userRepository = $userRepository;
         $this->userRequest = $userRequest;
-        $this->userResponse = $userResponse;
         $this->tokenManager = $tokenManager;
         $this->authHandler = $authHandler;
+        $this->userResponseSetter = $userResponseSetter;
     }
 
     /**
@@ -64,7 +69,7 @@ class AuthController extends AbstractController
 
         $violations = $this->userRequest->validateUserRequest();
 
-        if (count($violations) >0) {
+        if (count($violations) > 0) {
             return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
@@ -75,7 +80,7 @@ class AuthController extends AbstractController
         $user = new User();
         $this->userRepository->persistUser($user, $encoder);
 
-        return new JsonResponse($this->userResponse);
+        return new JsonResponse($this->userResponseSetter);
 
     }
 
@@ -85,14 +90,16 @@ class AuthController extends AbstractController
      * @param UserPasswordEncoderInterface $encoder
      * @return JsonResponse
      */
-    public function login(Request $request, UserPasswordEncoderInterface  $encoder): JsonResponse
+    public function login(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
         $this->userRequest->setUserRequest($request);
         $request = JsonRequestDataKeeper::keepJson($request);
+        // @todo: Find user by email, validate password, set isAdmin
 
         $email = (string)$request->get('email', '');
         $password = (string)$request->get('password', '');
         $request = $request->toArray();
+        // todo: remove
         $user = User::createFromPayload($email, (array)$password);
 
         $token = $this->tokenManager->createFromPayload($user, $request);

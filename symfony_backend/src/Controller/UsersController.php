@@ -59,6 +59,7 @@ class UsersController extends AbstractController
     public function storeAction(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
         $this->userRequest->setUserRequest($request);
+        // @todo: validate with role
         $violations = $this->userRequest->validateUserRequest();
 
         if (count($violations) > 0) {
@@ -68,6 +69,8 @@ class UsersController extends AbstractController
         if ($this->userRepository->findOneBy(['email' => $this->userRequest->email])) {
             return new JsonResponse(['errors' => 'This email is already in use'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
+        // @todo: Find and set role by role_id
 
         $user = new User();
         $this->userRepository->persistUser($user, $encoder);
@@ -82,7 +85,6 @@ class UsersController extends AbstractController
      */
     public function showAction(int $id): JsonResponse
     {
-
         /** @var User|null $user */
         $user = $this->userRepository->find($id);
 

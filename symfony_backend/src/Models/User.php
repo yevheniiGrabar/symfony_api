@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 
+// todo: delete
 class User implements JWTUserInterface
 {
     /** @var int */

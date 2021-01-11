@@ -16,12 +16,15 @@ class UserRepository extends AbstractRepository
     /** @var UserResponse */
     private $userResponse;
 
-    public function __construct(ManagerRegistry $registry, UserRequest $userRequest, UserResponse $userResponse)
-    {
-        parent::__construct($registry);
-        $this->userRequest = $userRequest;
-        $this->userResponse = $userResponse;
-    }
+//    /**
+//     * @todo: do not inject userRequest and userResponse
+//     */
+//    public function __construct(ManagerRegistry $registry, UserRequest $userRequest, UserResponse $userResponse)
+//    {
+//        parent::__construct($registry);
+//        $this->userRequest = $userRequest;
+//        $this->userResponse = $userResponse;
+//    }
 
     /**
      * @return string
@@ -30,19 +33,18 @@ class UserRepository extends AbstractRepository
     {
         return User::class;
     }
-
-    /**
-     * @param User $user
-     * @param UserPasswordEncoderInterface $encoder
-     */
-    public function persistUser(User $user,  UserPasswordEncoderInterface $encoder): void
-    {
-        $user->setName($this->userRequest->name);
-        $user->setEmail($this->userRequest->email);
-        $user->setPassword($encoder->encodePassword($user, $this->userRequest->password));
-        $user->setRole($this->userRequest->role);
-        $this->plush($user);
-        $this->userResponse->setUserResponse($user);
-    }
+//
+//    /**
+//     * @param User $user
+//     * @param UserPasswordEncoderInterface $encoder
+//     */
+//    public function persistUser(User $user, UserPasswordEncoderInterface $encoder): void
+//    {
+//        $user->setName($this->userRequest->name);
+//        $user->setEmail($this->userRequest->email);
+//        $user->setPassword($encoder->encodePassword($user, $this->userRequest->password));
+//        $user->setRole($this->userRequest->role);
+//        $this->plush($user);
+//        $this->userResponse->setUserResponse($user);
+//    }
 }
-

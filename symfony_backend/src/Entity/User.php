@@ -7,7 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -259,29 +258,29 @@ class User implements EntityInterface, JWTUserInterface
         ];
     }
 
-        /**
-         * @param string $username
-         * @param array $payload
-         * @return JWTUserInterface
-         * @noinspection PhpMissingParamTypeInspection
-         */
-        public static function createFromPayload($username, array $payload): JWTUserInterface
-        {
-            $user = new \App\Models\User();
-            $user->setEmail($username);
+    /**
+     * @param string $username
+     * @param array $payload
+     * @return JWTUserInterface
+     * @noinspection PhpMissingParamTypeInspection
+     */
+    public static function createFromPayload($username, array $payload): JWTUserInterface
+    {
+        $user = new User();
+        $user->setEmail($username);
 
-            if (array_key_exists('id', $payload)) {
-                $user->setId($payload['id']);
-            }
-
-            if (array_key_exists('name', $payload)) {
-                $user->setName($payload['name']);
-            }
-
-            if (array_key_exists('isAdmin', $payload)) {
-                $user->setIsAdmin($payload['isAdmin']);
-            }
-
-            return $user;
+        if (array_key_exists('id', $payload)) {
+            $user->setId($payload['id']);
         }
+
+        if (array_key_exists('name', $payload)) {
+            $user->setName($payload['name']);
+        }
+
+        if (array_key_exists('isAdmin', $payload)) {
+            $user->setIsAdmin($payload['isAdmin']);
+        }
+
+        return $user;
     }
+}

@@ -5,7 +5,7 @@ security:
     providers:
         app_user_provider:
             lexik_jwt:
-                class: App\Models\User
+                class: App\Entity\User
 
     firewalls:
         login:

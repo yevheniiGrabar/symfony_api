@@ -14,6 +14,7 @@ use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validation;
 
+// @todo: keep it as simple stuct
 class UserRequest
 {
     /** @var string */
@@ -39,6 +40,7 @@ class UserRequest
 
     /**
      * @param Request $request
+     * @todo: move this method into separate service
      */
     public function setUserRequest(Request $request): void
     {
@@ -51,12 +53,16 @@ class UserRequest
         $this->role = $role;
     }
 
+    /**
+     * @return ConstraintViolationListInterface
+     * @todo: move this method into separate service and use optional parameter for role validation
+     */
     public function validateUserRequest(): ConstraintViolationListInterface
     {
         $validator = Validation::createValidator();
 
-        $violations = $validator->validate($this->name,[
-            new NotBlank(['message'=> 'Name is required']),
+        $violations = $validator->validate($this->name, [
+            new NotBlank(['message' => 'Name is required']),
             new Length([
                 'min' => 2,
                 'max' => 255,
