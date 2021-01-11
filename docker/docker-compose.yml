@@ -3,7 +3,6 @@ version: '3'
 volumes:
   db-volume:
   symfony_backend_vendor:
-  crud_vendor:
 
 services:
   db:
@@ -58,18 +57,4 @@ services:
     volumes:
       - ../symfony_backend:/var/www/html
       - symfony_backend_vendor:/var/www/html/vendor
-  crud:
-    build:
-      context: ../crud
-      dockerfile: ../docker/images/symfony/Dockerfile
-    env_file:
-      - ../crud/.env
-    environment:
-      SALT: "${SALT:-secureSalt}"
-    depends_on:
-      - db
-    ports:
-      - 8081:80
-    volumes:
-      - ../crud:/var/www/html
-      - crud_vendor:/var/www/html/vendor
+

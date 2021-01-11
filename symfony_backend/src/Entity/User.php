@@ -3,13 +3,21 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository", repositoryClass=UserRepository::class)
+ * @ORM\Entity(repositoryClass=UserRepository::class)
  */
-class User implements EntityInterface
+class User implements EntityInterface, JWTUserInterface
 {
+
+    /** @var bool */
+    private $isAdmin = false;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -42,6 +50,17 @@ class User implements EntityInterface
      * @var Role
      */
     private $role;
+
+    /**
+     * @ORM\OneToMany(targetEntity=AccessToken::class, mappedBy="user", orphanRemoval=true)
+     * @var Collection|AccessToken[]
+     */
+    private $accessTokens;
+
+    public function __construct()
+    {
+        $this->accessTokens = new ArrayCollection();
+    }
 
     /**
      * @return int|null
@@ -120,14 +139,11 @@ class User implements EntityInterface
     }
 
     /**
-     * @param Role $role
-     * @return $this
+     * @return Role
      */
-    public function getRole(Role $role): User
+    public function getRole(): Role
     {
-        $this->role = $role;
-
-        return $this;
+        return $this->role;
     }
 
     /**
@@ -153,4 +169,119 @@ class User implements EntityInterface
     {
         return $this;
     }
-}
+
+    /**
+     * @return string
+     */
+    public function getSalt(): string
+    {
+        return (string)getenv('SALT');
+    }
+
+    /**
+     * @param int $id
+     * @return User
+     */
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $isAdmin
+     * @return User
+     */
+    public function setIsAdmin(bool $isAdmin): self
+    {
+        $this->isAdmin = $isAdmin;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->isAdmin;
+    }
+
+    /**
+     * @param User $user
+     * @return Collection|AccessToken[]
+     */
+    public function getAccessTokens(): Collection
+    {
+        return $this->accessTokens;
+    }
+
+    /**
+     * @param AccessToken $accessToken
+     * @return $this
+     */
+    public function addAccessToken(AccessToken $accessToken): self
+    {
+        if (!$this->accessTokens->contains($accessToken)) {
+            $this->accessTokens[] = $accessToken;
+            $accessToken->setUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param AccessToken $accessToken
+     * @return $this
+     */
+    public function removeAccessToken(AccessToken $accessToken): self
+    {
+        if ($this->accessTokens->removeElement($accessToken)) {
+            if ($accessToken->getUser() === $this) {
+                $accessToken->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'email' => $this->getUsername(),
+            'isAdmin' => $this->isAdmin()
+        ];
+    }
+
+        /**
+         * @param string $username
+         * @param array $payload
+         * @return JWTUserInterface
+         * @noinspection PhpMissingParamTypeInspection
+         */
+        public static function createFromPayload($username, array $payload): JWTUserInterface
+        {
+            $user = new \App\Models\User();
+            $user->setEmail($username);
+
+            if (array_key_exists('id', $payload)) {
+                $user->setId($payload['id']);
+            }
+
+            if (array_key_exists('name', $payload)) {
+                $user->setName($payload['name']);
+            }
+
+            if (array_key_exists('isAdmin', $payload)) {
+                $user->setIsAdmin($payload['isAdmin']);
+            }
+
+            return $user;
+        }
+    }

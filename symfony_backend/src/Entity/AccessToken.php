@@ -59,10 +59,18 @@ class AccessToken implements EntityInterface
     }
 
     /**
+     * @return User
+     */
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+
+    /**
      * @param User $user
      * @return $this
      */
-    public function getUser(User $user): self
+    public function setUser(User $user): self
     {
         $this->user = $user;
 
