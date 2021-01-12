@@ -31,3 +31,4 @@ class UserResponseSetter
         $this->userResponse->isAdmin = $this->rolesManager->isAdmin($user);
     }
 }
+

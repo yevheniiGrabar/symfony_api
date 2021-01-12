@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Requests\UserRequest;
+use App\Requests\UserRequestSetter;
+use App\Requests\ValidationRequest;
 use App\Responses\UserResponse;
 use App\Responses\UserResponseSetter;
 use App\Services\JsonRequestDataKeeper;
@@ -41,20 +43,30 @@ class AuthController extends AbstractController
     /** @var UserResponseSetter */
     private $userResponseSetter;
 
+    /** @var UserRequestSetter */
+    private $userRequestSetter;
+
+    /** @var ValidationRequest */
+    private $validationRequest;
+
     public function __construct
     (
         UserRepository $userRepository,
-        UserRequest $userRequest,
         JWTTokenManagerInterface $tokenManager,
         AuthenticationSuccessHandler $authHandler,
+        ValidationRequest $validationRequest,
+        UserRequest $userRequest,
+        UserRequestSetter $userRequestSetter,
         UserResponseSetter $userResponseSetter
     )
     {
         $this->userRepository = $userRepository;
-        $this->userRequest = $userRequest;
         $this->tokenManager = $tokenManager;
         $this->authHandler = $authHandler;
+        $this->userRequest = $userRequest;
+        $this->userRequestSetter = $userRequestSetter;
         $this->userResponseSetter = $userResponseSetter;
+        $this->validationRequest = $validationRequest;
     }
 
     /**
@@ -65,9 +77,9 @@ class AuthController extends AbstractController
      */
     public function registerAction(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
-        $this->userRequest->setUserRequest($request);
+        $this->userRequestSetter->setUserRequest($request);
 
-        $violations = $this->userRequest->validateUserRequest();
+        $violations = $this->validationRequest->validateUserRequest();
 
         if (count($violations) > 0) {
             return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -78,7 +90,7 @@ class AuthController extends AbstractController
         }
 
         $user = new User();
-        $this->userRepository->persistUser($user, $encoder);
+        $this->persistUser($user, $encoder);
 
         return new JsonResponse($this->userResponseSetter);
 
@@ -92,7 +104,7 @@ class AuthController extends AbstractController
      */
     public function login(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
-        $this->userRequest->setUserRequest($request);
+        $this->userRequestSetter->setUserRequest($request);
         $request = JsonRequestDataKeeper::keepJson($request);
         // @todo: Find user by email, validate password, set isAdmin
 
@@ -119,5 +131,20 @@ class AuthController extends AbstractController
         $user = $storage->getToken()->getUser();
 
         return new JsonResponse($user->toArray());
+    }
+
+
+    /**
+     * @param User $user
+     * @param UserPasswordEncoderInterface $encoder
+     */
+    public function persistUser(User $user, UserPasswordEncoderInterface $encoder): void
+    {
+        $user->setName($this->userRequest->name);
+        $user->setEmail($this->userRequest->email);
+        $user->setPassword($encoder->encodePassword($user, $this->userRequest->password));
+        $user->setRole($this->userRequest->role);
+        $this->userRepository->plush($user);
+        $this->userResponseSetter->setUserResponse($user);
     }
 }

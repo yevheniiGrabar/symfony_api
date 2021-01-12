@@ -4,6 +4,9 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Requests\UserRequest;
+use App\Requests\UserRequestSetter;
+use App\Requests\ValidationRequest;
+use App\Responses\UserResponseSetter;
 use App\Services\RolesManager;
 use App\Responses\UserResponse;
 use App\Repository\RoleRepository;
@@ -35,12 +38,25 @@ class UsersController extends AbstractController
     /** @var UserResponse */
     private $userResponse;
 
+    /** @var UserRequestSetter */
+    private $userRequestSetter;
+
+    /** @var ValidationRequest */
+    private $validationRequest;
+
+    /** @var UserResponseSetter */
+    private $userResponseSetter;
+
     public function __construct(
         UserRepository $userRepository,
         RoleRepository $roleRepository,
         RolesManager $rolesManager,
         UserRequest $userRequest,
-        UserResponse $userResponse
+        UserResponse $userResponse,
+        ValidationRequest $validationRequest,
+        UserRequestSetter $userRequestSetter,
+        UserResponseSetter $userResponseSetter
+
     )
     {
         $this->userRepository = $userRepository;
@@ -48,6 +64,9 @@ class UsersController extends AbstractController
         $this->rolesManager = $rolesManager;
         $this->userRequest = $userRequest;
         $this->userResponse = $userResponse;
+        $this->userRequestSetter = $userRequestSetter;
+        $this->validationRequest = $validationRequest;
+        $this->userResponseSetter = $userResponseSetter;
     }
 
     /**
@@ -58,9 +77,9 @@ class UsersController extends AbstractController
      */
     public function storeAction(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
-        $this->userRequest->setUserRequest($request);
+        $this->userRequestSetter->setUserRequest($request);
         // @todo: validate with role
-        $violations = $this->userRequest->validateUserRequest();
+        $violations = $this->validationRequest->validateUserRequest();
 
         if (count($violations) > 0) {
             return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -73,7 +92,7 @@ class UsersController extends AbstractController
         // @todo: Find and set role by role_id
 
         $user = new User();
-        $this->userRepository->persistUser($user, $encoder);
+        $this->persistUser($user, $encoder);
 
         return new JsonResponse($this->userResponse);
     }
@@ -92,9 +111,9 @@ class UsersController extends AbstractController
             return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
 
-        $this->userResponse->setUserResponse($user);
+        $this->userResponseSetter->setUserResponse($user);
 
-        return new JsonResponse($this->userResponse);
+        return new JsonResponse($this->userResponseSetter);
     }
 
     /**
@@ -106,8 +125,8 @@ class UsersController extends AbstractController
      */
     public function updateAction(int $id, Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
-        $this->userRequest->setUserRequest($request);
-        $violations = $this->userRequest->validateUserRequest();
+        $this->userRequestSetter->setUserRequest($request);
+        $violations = $this->validationRequest->validateUserRequest();
 
         if (count($violations) > 0) {
             return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -127,9 +146,9 @@ class UsersController extends AbstractController
             return new JsonResponse(['errors' => 'This email already in use'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $this->userRepository->persistUser($user, $encoder);
+        $this->persistUser($user, $encoder);
 
-        return new JsonResponse($this->userResponse);
+        return new JsonResponse($this->userResponseSetter);
     }
 
     /**
@@ -153,5 +172,19 @@ class UsersController extends AbstractController
         }
 
         return new JsonResponse(['success' => true]);
+    }
+
+    /**
+     * @param User $user
+     * @param UserPasswordEncoderInterface $encoder
+     */
+    public function persistUser(User $user, UserPasswordEncoderInterface $encoder): void
+    {
+        $user->setName($this->userRequest->name);
+        $user->setEmail($this->userRequest->email);
+        $user->setPassword($encoder->encodePassword($user, $this->userRequest->password));
+        $user->setRole($this->userRequest->role);
+        $this->userRepository->plush($user);
+        $this->userResponseSetter->setUserResponse($user);
     }
 }
