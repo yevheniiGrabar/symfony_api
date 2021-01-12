@@ -3,22 +3,22 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
 use App\Requests\UserRequest;
+use App\Repository\UserRepository;
 use App\Requests\UserRequestSetter;
 use App\Requests\ValidationRequest;
-use App\Responses\UserResponse;
 use App\Responses\UserResponseSetter;
 use App\Services\JsonRequestDataKeeper;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Services\RolesManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 
 /**
  * @Route("/api", name="auth.")
@@ -30,9 +30,6 @@ class AuthController extends AbstractController
 
     /** @var UserRequest */
     private $userRequest;
-
-    /** @var UserResponse */
-    private $userResponse;
 
     /** @var JWTTokenManagerInterface */
     private $tokenManager;
@@ -49,6 +46,9 @@ class AuthController extends AbstractController
     /** @var ValidationRequest */
     private $validationRequest;
 
+    /** @var RolesManager */
+    private $rolesManager;
+
     public function __construct
     (
         UserRepository $userRepository,
@@ -57,6 +57,7 @@ class AuthController extends AbstractController
         ValidationRequest $validationRequest,
         UserRequest $userRequest,
         UserRequestSetter $userRequestSetter,
+        RolesManager $rolesManager,
         UserResponseSetter $userResponseSetter
     )
     {
@@ -64,6 +65,7 @@ class AuthController extends AbstractController
         $this->tokenManager = $tokenManager;
         $this->authHandler = $authHandler;
         $this->userRequest = $userRequest;
+        $this->rolesManager = $rolesManager;
         $this->userRequestSetter = $userRequestSetter;
         $this->userResponseSetter = $userResponseSetter;
         $this->validationRequest = $validationRequest;
@@ -105,15 +107,23 @@ class AuthController extends AbstractController
     public function login(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
         $this->userRequestSetter->setUserRequest($request);
-        $request = JsonRequestDataKeeper::keepJson($request);
-        // @todo: Find user by email, validate password, set isAdmin
 
+        $request = JsonRequestDataKeeper::keepJson($request);
         $email = (string)$request->get('email', '');
         $password = (string)$request->get('password', '');
-        $request = $request->toArray();
-        // todo: remove
-        $user = User::createFromPayload($email, (array)$password);
 
+
+        /** @var User|null $user */
+        $user = $this->userRepository->findOneBy(['email' => $email]);
+
+
+        if (!$encoder->isPasswordValid($user, $password)) {
+            return new JsonResponse(['errors' => 'Invalid password'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // @todo: Find user by email, validate password, set isAdmin
+
+        $request = $request->toArray();
         $token = $this->tokenManager->createFromPayload($user, $request);
         $this->authHandler->handleAuthenticationSuccess($user, $token);
 

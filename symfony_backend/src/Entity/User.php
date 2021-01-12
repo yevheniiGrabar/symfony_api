@@ -41,7 +41,7 @@ class User implements EntityInterface, JWTUserInterface
      * @ORM\Column(type="string", length=255)
      * @var string
      */
-    private $password;
+    public $password;
 
     /**
      * @ORM\ManyToOne(targetEntity=Role::class, inversedBy="users")

@@ -92,6 +92,7 @@ class UsersController extends AbstractController
         // @todo: Find and set role by role_id
 
         $user = new User();
+
         $this->persistUser($user, $encoder);
 
         return new JsonResponse($this->userResponse);
@@ -188,3 +189,4 @@ class UsersController extends AbstractController
         $this->userResponseSetter->setUserResponse($user);
     }
 }
+

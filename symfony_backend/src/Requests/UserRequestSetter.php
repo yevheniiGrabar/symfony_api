@@ -2,8 +2,8 @@
 
 namespace App\Requests;
 
-use App\Services\JsonRequestDataKeeper;
 use App\Services\RolesManager;
+use App\Services\JsonRequestDataKeeper;
 use Symfony\Component\HttpFoundation\Request;
 
 class UserRequestSetter
@@ -16,19 +16,18 @@ class UserRequestSetter
 
     public function __construct(RolesManager $rolesManager, UserRequest $userRequest)
     {
-        $this->rolesManager = $rolesManager;
         $this->userRequest = $userRequest;
+        $this->rolesManager = $rolesManager;
     }
 
     /**
      * @param Request $request
-     * @todo: move this method into separate service
      */
     public function setUserRequest(Request $request): void
     {
-        $request = JsonRequestDataKeeper::keepJson($request);
         $roleId = (int)$request->get('role_id', 0);
         $role = $this->rolesManager->findOrDefault($roleId);
+        $request = JsonRequestDataKeeper::keepJson($request);
         $this->userRequest->name = (string)$request->get('name', '');
         $this->userRequest->email = (string)$request->get('email', '');
         $this->userRequest->password = (string)$request->get('password', '');

@@ -2,13 +2,14 @@
 
 namespace App\Requests;
 
+use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotCompromisedPassword;
 use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
-use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints\NotCompromisedPassword;
+
 
 class ValidationRequest
 {
@@ -61,6 +62,7 @@ class ValidationRequest
         $violations->addAll(
             $validator->validate($this->userRequest->role, [
                 new NotNull(['message' => 'Role is required'])
+
             ])
         );
 
