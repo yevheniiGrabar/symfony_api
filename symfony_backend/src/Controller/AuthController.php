@@ -3,11 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Requests\RequestParser;
 use App\Requests\UserRequest;
 use App\Repository\UserRepository;
-use App\Requests\UserRequestSetter;
 use App\Requests\ValidationRequest;
+use App\Responses\UserResponse;
 use App\Responses\UserResponseSetter;
 use App\Services\JsonRequestDataKeeper;
 use App\Services\RolesManager;
@@ -38,17 +37,15 @@ class AuthController extends AbstractController
     /** @var AuthenticationSuccessHandler */
     private $authHandler;
 
-    /** @var UserResponseSetter */
-    private $userResponseSetter;
-
-    /** @var UserRequestSetter */
-    private $userRequestSetter;
 
     /** @var ValidationRequest */
     private $validationRequest;
 
     /** @var RolesManager */
     private $rolesManager;
+
+    /** @var UserResponse */
+    private $userResponse;
 
     public function __construct
     (
@@ -57,9 +54,8 @@ class AuthController extends AbstractController
         AuthenticationSuccessHandler $authHandler,
         ValidationRequest $validationRequest,
         UserRequest $userRequest,
-        UserRequestSetter $userRequestSetter,
-        RolesManager $rolesManager,
-        UserResponseSetter $userResponseSetter
+        UserResponse $userResponse,
+        RolesManager $rolesManager
     )
     {
         $this->userRepository = $userRepository;
@@ -67,8 +63,7 @@ class AuthController extends AbstractController
         $this->authHandler = $authHandler;
         $this->userRequest = $userRequest;
         $this->rolesManager = $rolesManager;
-        $this->userRequestSetter = $userRequestSetter;
-        $this->userResponseSetter = $userResponseSetter;
+        $this->userResponse = $userResponse;
         $this->validationRequest = $validationRequest;
     }
 
@@ -80,7 +75,7 @@ class AuthController extends AbstractController
      */
     public function registerAction(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
-        $this->userRequestSetter->setUserRequest($request);
+        $this->setUserRequest($request);
 
         $violations = $this->validationRequest->validateUserRequest();
 
@@ -95,7 +90,7 @@ class AuthController extends AbstractController
         $user = new User();
         $this->persistUser($user, $encoder);
 
-        return new JsonResponse($this->userResponseSetter);
+        return new JsonResponse($this->userResponse);
 
     }
 
@@ -107,13 +102,11 @@ class AuthController extends AbstractController
      */
     public function login(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
-        $this->userRequestSetter->setUserRequest($request);
-
+        $this->setUserRequest($request);
         $request = JsonRequestDataKeeper::keepJson($request);
+
         $email = (string)$request->get('email', '');
         $password = (string)$request->get('password', '');
-
-       // $request = RequestParser::parse($request);
 
         /** @var User|null $user */
         $user = $this->userRepository->findOneBy(['email' => $email]);
@@ -157,6 +150,31 @@ class AuthController extends AbstractController
         $user->setPassword($encoder->encodePassword($user, $this->userRequest->password));
         $user->setRole($this->userRequest->role);
         $this->userRepository->plush($user);
-        $this->userResponseSetter->setUserResponse($user);
+        $this->setUserResponse($user);
+    }
+
+    /**
+     * @param Request $request
+     */
+    private function setUserRequest(Request $request): void
+    {
+        $request = JsonRequestDataKeeper::keepJson($request);
+        $roleId = (int)$request->get('role_id', 0);
+        $role = $this->rolesManager->findOrDefault($roleId);
+        $this->userRequest->name = (string)$request->get('name', '');
+        $this->userRequest->email = (string)$request->get('email', '');
+        $this->userRequest->password = (string)$request->get('password', '');
+        $this->userRequest->role = $role;
+    }
+
+    /**
+     * @param User $user
+     */
+    public function setUserResponse(User $user)
+    {
+        $this->userResponse->id = $user->getId();
+        $this->userResponse->name = $user->getName();
+        $this->userResponse->email = $user->getEmail();
+        $this->userResponse->isAdmin = $this->rolesManager->isAdmin($user);
     }
 }
