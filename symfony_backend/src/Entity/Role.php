@@ -9,7 +9,6 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=RoleRepository::class)
- * @todo: fix types
  */
 class Role implements EntityInterface
 {
@@ -23,6 +22,7 @@ class Role implements EntityInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * @var string
      */
     private $name;
 
@@ -46,9 +46,9 @@ class Role implements EntityInterface
     }
 
     /**
-     * @return string|null
+     * @return string
      */
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
