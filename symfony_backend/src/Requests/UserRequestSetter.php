@@ -27,7 +27,6 @@ class UserRequestSetter
     {
         $roleId = (int)$request->get('role_id', 0);
         $role = $this->rolesManager->findOrDefault($roleId);
-        $request = JsonRequestDataKeeper::keepJson($request);
         $this->userRequest->name = (string)$request->get('name', '');
         $this->userRequest->email = (string)$request->get('email', '');
         $this->userRequest->password = (string)$request->get('password', '');

@@ -78,6 +78,7 @@ class UsersController extends AbstractController
     public function storeAction(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
         $this->userRequestSetter->setUserRequest($request);
+
         // @todo: validate with role
         $violations = $this->validationRequest->validateUserRequest();
 

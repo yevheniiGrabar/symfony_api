@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Requests\RequestParser;
 use App\Requests\UserRequest;
 use App\Repository\UserRepository;
 use App\Requests\UserRequestSetter;
@@ -112,19 +113,21 @@ class AuthController extends AbstractController
         $email = (string)$request->get('email', '');
         $password = (string)$request->get('password', '');
 
+       // $request = RequestParser::parse($request);
 
         /** @var User|null $user */
         $user = $this->userRepository->findOneBy(['email' => $email]);
 
+        if (!$user) {
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        }
 
         if (!$encoder->isPasswordValid($user, $password)) {
             return new JsonResponse(['errors' => 'Invalid password'], Response::HTTP_UNAUTHORIZED);
         }
 
-        // @todo: Find user by email, validate password, set isAdmin
-
-        $request = $request->toArray();
-        $token = $this->tokenManager->createFromPayload($user, $request);
+        $user->setIsAdmin($this->rolesManager->isAdmin($user));
+        $token = $this->tokenManager->createFromPayload($user, $user->toArray());
         $this->authHandler->handleAuthenticationSuccess($user, $token);
 
         return new JsonResponse(['token' => $token]);
@@ -142,7 +145,6 @@ class AuthController extends AbstractController
 
         return new JsonResponse($user->toArray());
     }
-
 
     /**
      * @param User $user
