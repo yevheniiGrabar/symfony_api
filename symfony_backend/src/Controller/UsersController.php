@@ -126,7 +126,6 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
             return new JsonResponse(['errors' => 'This email already in use'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $user = new User();
         $user->setName($request->name);
         $user->setEmail($request->email);
         $user->setPassword($encoder->encodePassword($user, $request->password));
