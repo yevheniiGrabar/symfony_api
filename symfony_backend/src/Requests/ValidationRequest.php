@@ -23,7 +23,7 @@ class ValidationRequest
 
     /**
      * @return ConstraintViolationListInterface
-     * @todo: move this method into separate service and use optional parameter for role validation
+     * @todo: use optional parameter for role validation
      */
     public function validateUserRequest(): ConstraintViolationListInterface
     {

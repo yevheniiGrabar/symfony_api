@@ -4,12 +4,11 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Requests\UserRequest;
+use App\Services\RolesManager;
+use App\Responses\UserResponse;
 use App\Repository\UserRepository;
 use App\Requests\ValidationRequest;
-use App\Responses\UserResponse;
-use App\Responses\UserResponseSetter;
 use App\Services\JsonRequestDataKeeper;
-use App\Services\RolesManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -37,7 +36,6 @@ class AuthController extends AbstractController
     /** @var AuthenticationSuccessHandler */
     private $authHandler;
 
-
     /** @var ValidationRequest */
     private $validationRequest;
 
@@ -49,21 +47,21 @@ class AuthController extends AbstractController
 
     public function __construct
     (
-        UserRepository $userRepository,
-        JWTTokenManagerInterface $tokenManager,
-        AuthenticationSuccessHandler $authHandler,
-        ValidationRequest $validationRequest,
         UserRequest $userRequest,
         UserResponse $userResponse,
-        RolesManager $rolesManager
+        RolesManager $rolesManager,
+        UserRepository $userRepository,
+        ValidationRequest $validationRequest,
+        JWTTokenManagerInterface $tokenManager,
+        AuthenticationSuccessHandler $authHandler
     )
     {
-        $this->userRepository = $userRepository;
-        $this->tokenManager = $tokenManager;
         $this->authHandler = $authHandler;
         $this->userRequest = $userRequest;
         $this->rolesManager = $rolesManager;
         $this->userResponse = $userResponse;
+        $this->tokenManager = $tokenManager;
+        $this->userRepository = $userRepository;
         $this->validationRequest = $validationRequest;
     }
 
@@ -88,6 +86,7 @@ class AuthController extends AbstractController
         }
 
         $user = new User();
+
         $this->persistUser($user, $encoder);
 
         return new JsonResponse($this->userResponse);

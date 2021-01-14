@@ -41,7 +41,6 @@ class UsersController extends AbstractController
     private $validationRequest;
 
 
-
     public function __construct(
         UserRepository $userRepository,
         RoleRepository $roleRepository,
@@ -49,7 +48,6 @@ class UsersController extends AbstractController
         UserRequest $userRequest,
         UserResponse $userResponse,
         ValidationRequest $validationRequest
-
     )
     {
         $this->userRepository = $userRepository;
@@ -68,10 +66,16 @@ class UsersController extends AbstractController
      */
     public function storeAction(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
-       $this->setUserRequest($request);
+        $this->setUserRequest($request);
+
         $request = JsonRequestDataKeeper::keepJson($request);
 
         $violations = $this->validationRequest->validateUserRequest();
+
+        $name = (string)$request->get('name', '');
+        $email = (string)$request->get('email', '');
+        $password = (string)$request->get('password', '');
+        $role_id = (int)$request->get('role_id', '');
 
         // @todo: validate with role
 
@@ -82,10 +86,13 @@ class UsersController extends AbstractController
         if ($this->userRepository->findOneBy(['email' => $this->userRequest->email])) {
             return new JsonResponse(['errors' => 'This email is already in use'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-
         // @todo: Find and set role by role_id
 
+        $role_id = $this->rolesManager->findOrDefault($role_id);
+        $user = $this->userRepository->findOneBy(['email' => $this->userRequest->email]);
+        //dd($role_id);
         $user = new User();
+
         $this->persistUser($user, $encoder);
 
         return new JsonResponse($this->userResponse);
@@ -142,6 +149,7 @@ class UsersController extends AbstractController
 
         $this->persistUser($user, $encoder);
 
+
         return new JsonResponse($this->userResponse);
     }
 
@@ -181,7 +189,6 @@ class UsersController extends AbstractController
         $this->userRepository->plush($user);
         $this->setUserResponse($user);
     }
-
 
     /**
      * @param Request $request
