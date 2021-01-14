@@ -4,9 +4,11 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Services\RolesManager;
+use Doctrine\ORM\ORMException;
 use App\Repository\UserRepository;
 use App\Services\UserRequestParser;
 use App\Services\UserRequestValidator;
+use Doctrine\ORM\OptimisticLockException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,7 +19,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 /**
  * @Route("api/users", name="users.")
  */
-class UsersController extends AbstractController
+class UsersController extends AbstractController implements TokenAuthenticatedController
 {
     /** @var UserRepository */
     private UserRepository $userRepository;
@@ -44,6 +46,8 @@ class UsersController extends AbstractController
      * @param Request $request
      * @param UserPasswordEncoderInterface $encoder
      * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function storeAction(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
@@ -73,6 +77,8 @@ class UsersController extends AbstractController
      * @Route("/show/{id}", name="show", methods={"GET"})
      * @param int $id
      * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function showAction(int $id): JsonResponse
     {
@@ -94,6 +100,8 @@ class UsersController extends AbstractController
      * @param Request $request
      * @param UserPasswordEncoderInterface $encoder
      * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function updateAction(int $id, Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {

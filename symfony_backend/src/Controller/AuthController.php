@@ -7,6 +7,8 @@ use App\Services\RolesManager;
 use App\Repository\UserRepository;
 use App\Services\UserRequestParser;
 use App\Services\UserRequestValidator;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,6 +41,8 @@ class AuthController extends AbstractController
      * @param Request $request
      * @param UserPasswordEncoderInterface $encoder
      * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function registerAction(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
@@ -71,6 +75,8 @@ class AuthController extends AbstractController
      * @param AuthenticationSuccessHandler $authHandler
      * @param RolesManager $rolesManager
      * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function login(
         Request $request,

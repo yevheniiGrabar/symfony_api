@@ -15,7 +15,7 @@ class User implements EntityInterface, JWTUserInterface
 {
 
     /** @var bool */
-    private bool $isAdmin = false;
+    public bool $isAdmin = false;
 
     /**
      * @ORM\Id
@@ -23,7 +23,7 @@ class User implements EntityInterface, JWTUserInterface
      * @ORM\Column(type="integer")
      * @var int|null
      */
-    private ?int $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
