@@ -13,8 +13,8 @@ INSERT INTO `role` (`id`, `name`) VALUES
 (2, 'user');
 
 INSERT INTO `user` (`id`, `role_id`, `name`, `email`, `password`) VALUES
-(1, 1, 'admin', 'admin@email.com', 'password'),
-(2, 2, 'user', 'user@email.com', 'password');
+(1, 1, 'admin', 'admin@email.com', '$2y$13$nYqiTj5R2UQZZDHs1JFF/e53n9LfNG1NLfr/Ji8IORcpy9z0UNdUe'),
+(2, 2, 'user', 'user@email.com', '$2y$13$nYqiTj5R2UQZZDHs1JFF/e53n9LfNG1NLfr/Ji8IORcpy9z0UNdUe');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
