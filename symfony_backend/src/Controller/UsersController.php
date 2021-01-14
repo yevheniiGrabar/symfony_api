@@ -3,13 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Requests\UserRequest;
-use App\Requests\ValidationRequest;
-use App\Services\JsonRequestDataKeeper;
 use App\Services\RolesManager;
-use App\Responses\UserResponse;
-use App\Repository\RoleRepository;
 use App\Repository\UserRepository;
+use App\Services\UserRequestParser;
+use App\Services\UserRequestValidator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,39 +20,23 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 class UsersController extends AbstractController
 {
     /** @var UserRepository */
-    private $userRepository;
-
-    /** @var RoleRepository */
-    private $roleRepository;
+    private UserRepository $userRepository;
 
     /** @var RolesManager */
-    private $rolesManager;
+    private RolesManager $rolesManager;
 
-    /** @var UserRequest */
-    private $userRequest;
-
-    /** @var UserResponse */
-    private $userResponse;
-
-    /** @var ValidationRequest */
-    private $validationRequest;
-
+    /** @var UserRequestParser */
+    private UserRequestParser $userRequestParser;
 
     public function __construct(
         UserRepository $userRepository,
-        RoleRepository $roleRepository,
         RolesManager $rolesManager,
-        UserRequest $userRequest,
-        UserResponse $userResponse,
-        ValidationRequest $validationRequest
+        UserRequestParser $userRequestParser
     )
     {
         $this->userRepository = $userRepository;
-        $this->roleRepository = $roleRepository;
         $this->rolesManager = $rolesManager;
-        $this->userRequest = $userRequest;
-        $this->userResponse = $userResponse;
-        $this->validationRequest = $validationRequest;
+        $this->userRequestParser = $userRequestParser;
     }
 
     /**
@@ -66,36 +47,26 @@ class UsersController extends AbstractController
      */
     public function storeAction(Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
-        $this->setUserRequest($request);
-
-        $request = JsonRequestDataKeeper::keepJson($request);
-
-        $violations = $this->validationRequest->validateUserRequest();
-
-        $name = (string)$request->get('name', '');
-        $email = (string)$request->get('email', '');
-        $password = (string)$request->get('password', '');
-        $role_id = (int)$request->get('role_id', '');
-
-        // @todo: validate with role
+        $request = $this->userRequestParser->parseRequest($request, true);
+        $violations = UserRequestValidator::validate($request, true);
 
         if (count($violations) > 0) {
             return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if ($this->userRepository->findOneBy(['email' => $this->userRequest->email])) {
+        if ($this->userRepository->findOneBy(['email' => $request->email])) {
             return new JsonResponse(['errors' => 'This email is already in use'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-        // @todo: Find and set role by role_id
 
-        $role_id = $this->rolesManager->findOrDefault($role_id);
-        $user = $this->userRepository->findOneBy(['email' => $this->userRequest->email]);
-        //dd($role_id);
         $user = new User();
+        $user->setIsAdmin($this->rolesManager->isAdmin($user));
+        $user->setName($request->name);
+        $user->setEmail($request->email);
+        $user->setPassword($encoder->encodePassword($user, $request->password));
+        $user->setRole($request->role);
+        $this->userRepository->plush($user);
 
-        $this->persistUser($user, $encoder);
-
-        return new JsonResponse($this->userResponse);
+        return new JsonResponse($user->toArray());
     }
 
     /**
@@ -112,9 +83,9 @@ class UsersController extends AbstractController
             return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
 
-        $this->setUserResponse($user);
+        $user->setIsAdmin($this->rolesManager->isAdmin($user));
 
-        return new JsonResponse($this->userResponse);
+        return new JsonResponse($user->toArray());
     }
 
     /**
@@ -126,8 +97,8 @@ class UsersController extends AbstractController
      */
     public function updateAction(int $id, Request $request, UserPasswordEncoderInterface $encoder): JsonResponse
     {
-        $this->setUserRequest($request);
-        $violations = $this->validationRequest->validateUserRequest();
+        $request = $this->userRequestParser->parseRequest($request, true);
+        $violations = UserRequestValidator::validate($request, true);
 
         if (count($violations) > 0) {
             return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -141,16 +112,21 @@ class UsersController extends AbstractController
         }
 
         if (
-            $this->userRequest->email != $user->getEmail()
-            && $this->userRepository->findOneBy(['email' => $this->userRequest->email])
+            $request->email != $user->getEmail()
+            && $this->userRepository->findOneBy(['email' => $request->email])
         ) {
             return new JsonResponse(['errors' => 'This email already in use'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $this->persistUser($user, $encoder);
+        $user = new User();
+        $user->setIsAdmin($this->rolesManager->isAdmin($user));
+        $user->setName($request->name);
+        $user->setEmail($request->email);
+        $user->setPassword($encoder->encodePassword($user, $request->password));
+        $user->setRole($request->role);
+        $this->userRepository->plush($user);
 
-
-        return new JsonResponse($this->userResponse);
+        return new JsonResponse($user->toArray());
     }
 
     /**
@@ -175,44 +151,4 @@ class UsersController extends AbstractController
 
         return new JsonResponse(['success' => true]);
     }
-
-    /**
-     * @param User $user
-     * @param UserPasswordEncoderInterface $encoder
-     */
-    public function persistUser(User $user, UserPasswordEncoderInterface $encoder): void
-    {
-        $user->setName($this->userRequest->name);
-        $user->setEmail($this->userRequest->email);
-        $user->setPassword($encoder->encodePassword($user, $this->userRequest->password));
-        $user->setRole($this->userRequest->role);
-        $this->userRepository->plush($user);
-        $this->setUserResponse($user);
-    }
-
-    /**
-     * @param Request $request
-     */
-    private function setUserRequest(Request $request): void
-    {
-        $request = JsonRequestDataKeeper::keepJson($request);
-        $roleId = (int)$request->get('role_id', 0);
-        $role = $this->rolesManager->findOrDefault($roleId);
-        $this->userRequest->name = (string)$request->get('name', '');
-        $this->userRequest->email = (string)$request->get('email', '');
-        $this->userRequest->password = (string)$request->get('password', '');
-        $this->userRequest->role = $role;
-    }
-
-    /**
-     * @param User $user
-     */
-    public function setUserResponse(User $user)
-    {
-        $this->userResponse->id = $user->getId();
-        $this->userResponse->name = $user->getName();
-        $this->userResponse->email = $user->getEmail();
-        $this->userResponse->isAdmin = $this->rolesManager->isAdmin($user);
-    }
 }
-

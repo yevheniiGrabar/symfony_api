@@ -16,7 +16,9 @@ abstract class AbstractRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param $entity
+     * @param EntityInterface $entity
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function plush(EntityInterface $entity): void
     {

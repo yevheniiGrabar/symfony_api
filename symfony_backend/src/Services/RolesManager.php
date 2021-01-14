@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Repository\RoleRepository;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 
 class RolesManager
 {
@@ -16,7 +18,7 @@ class RolesManager
     ];
 
     /** @var RoleRepository */
-    private $roleRepository;
+    private RoleRepository $roleRepository;
 
     public function __construct(RoleRepository $roleRepository)
     {
@@ -26,6 +28,8 @@ class RolesManager
     /**
      * @param User $user
      * @return bool
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function isAdmin(User $user): bool
     {
@@ -38,6 +42,8 @@ class RolesManager
     /**
      * @param int $roleId
      * @return Role
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function findOrDefault(int $roleId): Role
     {
@@ -52,6 +58,18 @@ class RolesManager
 
     /**
      * @return Role
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function getDefaultRole(): Role
+    {
+        return $this->getByNameOrCreate(self::USER_ROLE);
+    }
+
+    /**
+     * @return Role
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     private function getAdminRole(): Role
     {
@@ -59,16 +77,10 @@ class RolesManager
     }
 
     /**
-     * @return Role
-     */
-    private function getDefaultRole(): Role
-    {
-        return $this->getByNameOrCreate(self::USER_ROLE);
-    }
-
-    /**
      * @param string $name
      * @return Role
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     private function getByNameOrCreate(string $name): Role
     {

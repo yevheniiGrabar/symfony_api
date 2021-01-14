@@ -18,13 +18,13 @@ class Role implements EntityInterface
      * @ORM\Column(type="integer")
      * @var int|null
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @var string
      */
-    private $name;
+    private string $name;
 
     /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="role")

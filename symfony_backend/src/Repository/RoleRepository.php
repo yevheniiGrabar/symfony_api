@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Role;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 
 class RoleRepository extends AbstractRepository
@@ -15,6 +17,8 @@ class RoleRepository extends AbstractRepository
     /**
      * @param string $name
      * @return Role
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function createWithName(string $name): Role
     {

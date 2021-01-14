@@ -16,20 +16,20 @@ class AccessToken implements EntityInterface
      * @ORM\Column(type="integer")
      * @var int|null
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="text")
      * @var string
      */
-    private $token;
+    private string $token;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="accessToken")
      * @ORM\JoinColumn(nullable=false)
      * @var User
      */
-    private $user;
+    private User $user;
 
     /**
      * @return int|null

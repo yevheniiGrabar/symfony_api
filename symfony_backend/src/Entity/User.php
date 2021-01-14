@@ -15,7 +15,7 @@ class User implements EntityInterface, JWTUserInterface
 {
 
     /** @var bool */
-    private $isAdmin = false;
+    private bool $isAdmin = false;
 
     /**
      * @ORM\Id
@@ -23,32 +23,32 @@ class User implements EntityInterface, JWTUserInterface
      * @ORM\Column(type="integer")
      * @var int|null
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @var string
      */
-    private $name;
+    private string $name;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @var string
      */
-    private $email;
+    private string $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @var string
      */
-    public $password;
+    public string $password;
 
     /**
      * @ORM\ManyToOne(targetEntity=Role::class, inversedBy="users")
      * @ORM\JoinColumn(nullable=false)
      * @var Role
      */
-    private $role;
+    private Role $role;
 
     /**
      * @ORM\OneToMany(targetEntity=AccessToken::class, mappedBy="user", orphanRemoval=true)
@@ -208,7 +208,6 @@ class User implements EntityInterface, JWTUserInterface
     }
 
     /**
-     * @param User $user
      * @return Collection|AccessToken[]
      */
     public function getAccessTokens(): Collection

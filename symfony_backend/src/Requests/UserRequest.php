@@ -7,15 +7,14 @@ use App\Entity\Role;
 class UserRequest
 {
     /** @var string */
-    public $name = '';
+    public string $name = '';
 
     /** @var string */
-    public $email = '';
+    public string $email = '';
 
     /** @var string */
-    public $password = '';
+    public string $password = '';
 
     /** @var Role|null */
-    public $role = null;
+    public ?Role $role = null;
 }
-
