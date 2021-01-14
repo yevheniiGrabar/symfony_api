@@ -52,8 +52,6 @@ class UserMiddleware implements EventSubscriberInterface
             return;
         }
 
-        $request = $event->getRequest();
-
         $user = $this->tokenStorageInterface->getToken()->getUser();
 
         if (!$user instanceof User) {
@@ -64,6 +62,7 @@ class UserMiddleware implements EventSubscriberInterface
             return;
         }
 
+        $request = $event->getRequest();
         $defaultUserEndpoints = $this->userEndpoints($user->getId());
         $requestUri = $request->getRequestUri();
 
