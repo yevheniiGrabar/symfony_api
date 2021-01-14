@@ -63,11 +63,11 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         }
 
         $user = new User();
-        $user->setIsAdmin($this->rolesManager->isAdmin($user));
         $user->setName($request->name);
         $user->setEmail($request->email);
         $user->setPassword($encoder->encodePassword($user, $request->password));
         $user->setRole($request->role);
+        $user->setIsAdmin($this->rolesManager->isAdmin($user));
         $this->userRepository->plush($user);
 
         return new JsonResponse($user->toArray());
@@ -127,11 +127,11 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         }
 
         $user = new User();
-        $user->setIsAdmin($this->rolesManager->isAdmin($user));
         $user->setName($request->name);
         $user->setEmail($request->email);
         $user->setPassword($encoder->encodePassword($user, $request->password));
         $user->setRole($request->role);
+        $user->setIsAdmin($this->rolesManager->isAdmin($user));
         $this->userRepository->plush($user);
 
         return new JsonResponse($user->toArray());
