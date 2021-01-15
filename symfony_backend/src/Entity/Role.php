@@ -46,6 +46,17 @@ class Role implements EntityInterface
     }
 
     /**
+     * @param int $id
+     * @return $this
+     */
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getName(): string

@@ -90,6 +90,9 @@
     "guzzlehttp/psr7": {
         "version": "1.7.0"
     },
+    "hamcrest/hamcrest-php": {
+        "version": "v2.0.1"
+    },
     "laminas/laminas-code": {
         "version": "4.0.0"
     },
@@ -116,6 +119,9 @@
         "files": [
             "config/packages/lexik_jwt_authentication.yaml"
         ]
+    },
+    "mockery/mockery": {
+        "version": "1.4.2"
     },
     "namshi/jose": {
         "version": "7.2.3"
