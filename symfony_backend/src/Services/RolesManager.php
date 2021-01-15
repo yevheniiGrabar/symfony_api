@@ -93,7 +93,6 @@ class RolesManager
         if (!$role) {
             $role = $this->roleRepository->createWithName($name);
         }
-
         return $role;
     }
 }

@@ -112,6 +112,29 @@ class RolesManagerTest extends TestCase
     }
 
     /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function testGetDefaultRole()
+    {
+        $this->foundRole = $this->userRole;
+        $role = $this->rolesManager->getDefaultRole();
+        $this->assertEquals($this->userRole->getName(), $role->getName());
+    }
+
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function testDefaultRoleIfDoesNotExist()
+    {
+        $this->foundRole = null;
+        $this->createdRole = $this->userRole;
+        $role = $this->rolesManager->getDefaultRole();
+        $this->assertEquals($this->userRole->getName(), $role->getName());
+    }
+
+    /**
      * @return RoleRepository|MockInterface
      */
     private function mockRoleRepository()
