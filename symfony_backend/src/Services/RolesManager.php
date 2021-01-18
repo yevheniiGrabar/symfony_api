@@ -76,6 +76,7 @@ class RolesManager
         return $this->getByNameOrCreate(self::ADMIN_ROLE);
     }
 
+
     /**
      * @param string $name
      * @return Role

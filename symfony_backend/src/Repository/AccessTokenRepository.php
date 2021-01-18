@@ -12,9 +12,7 @@ class AccessTokenRepository extends AbstractRepository
         parent::__construct($registry);
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     protected function getModel(): string
     {
         return AccessToken::class;

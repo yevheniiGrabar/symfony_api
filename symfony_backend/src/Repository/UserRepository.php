@@ -7,17 +7,13 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class UserRepository extends AbstractRepository
 {
-    /**
-     * @param ManagerRegistry $registry
-     */
+    /** @param ManagerRegistry $registry */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry);
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     protected function getModel(): string
     {
         return User::class;

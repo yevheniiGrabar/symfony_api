@@ -8,6 +8,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Symfony\Component\HttpFoundation\Request;
 
+
 class UserRequestParser
 {
     /** @var RolesManager */
@@ -32,6 +33,7 @@ class UserRequestParser
     public function parseRequest(Request $request, bool $withRole = false): UserRequest
     {
         $request = JsonRequestDataKeeper::keepJson($request);
+
         $parsedRequest = new UserRequest();
         $parsedRequest->name = (string)$request->get('name', '');
         $parsedRequest->email = (string)$request->get('email', '');

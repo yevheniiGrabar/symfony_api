@@ -29,9 +29,7 @@ class RoleRepository extends AbstractRepository
         return $role;
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     protected function getModel(): string
     {
         return Role::class;

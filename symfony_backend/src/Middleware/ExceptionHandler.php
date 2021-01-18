@@ -12,9 +12,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class ExceptionHandler implements EventSubscriberInterface
 {
-    /**
-     * @param ExceptionEvent $event
-     */
+    /** @param ExceptionEvent $event */
     public function onKernelException(ExceptionEvent $event)
     {
         $throwable = $event->getThrowable();
@@ -25,9 +23,7 @@ class ExceptionHandler implements EventSubscriberInterface
         }
     }
 
-    /**
-     * @return array
-     */
+    /** @return array */
     public static function getSubscribedEvents(): array
     {
         return [

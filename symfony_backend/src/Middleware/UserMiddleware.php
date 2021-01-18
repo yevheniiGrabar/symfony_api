@@ -36,9 +36,7 @@ class UserMiddleware implements EventSubscriberInterface
         $this->tokenStorageInterface = $storage;
     }
 
-    /**
-     * @param ControllerEvent $event
-     */
+    /** @param ControllerEvent $event */
     public function onKernelController(ControllerEvent $event): void
     {
         /** @var AbstractController|AbstractController[] $controller */
@@ -71,9 +69,7 @@ class UserMiddleware implements EventSubscriberInterface
         }
     }
 
-    /**
-     * @return array
-     */
+    /** @return array */
     public static function getSubscribedEvents(): array
     {
         return [

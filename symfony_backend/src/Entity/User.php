@@ -244,9 +244,7 @@ class User implements EntityInterface, JWTUserInterface
         return $this;
     }
 
-    /**
-     * @return array
-     */
+    /** @return array */
     public function toArray(): array
     {
         return [
