@@ -2,11 +2,11 @@
 
 namespace App\Tests\TestCases;
 
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class FeatureTestCase extends WebTestCase
 {
@@ -19,6 +19,7 @@ class FeatureTestCase extends WebTestCase
     protected const EXISTING_USER_NAME = 'user';
     protected const EXISTING_USER_EMAIL = 'user@email.com';
     protected const EXISTING_USER_PASSWORD = 'password';
+    protected const WEAK_PASSWORD = '111';
     protected const VALID_PASSWORD = 'SoMeSeCuRePaSsWoRd54535251!!!';
     protected const VALID_NAME = 'SomeUsername';
 
@@ -51,7 +52,8 @@ class FeatureTestCase extends WebTestCase
     protected function loginAsUser(
         string $email = self::EXISTING_USER_EMAIL,
         string $password = self::EXISTING_USER_PASSWORD
-    ): void {
+    ): void
+    {
         $this->post('/api/login', [
             'email' => $email,
             'password' => $password
@@ -68,7 +70,8 @@ class FeatureTestCase extends WebTestCase
         string $name = self::VALID_NAME,
         string $email = '',
         string $password = self::VALID_PASSWORD
-    ): string {
+    ): string
+    {
         if ($email == '') {
             $email = $this->getNonExistingValidEmail();
         }

@@ -51,16 +51,16 @@ class AdminsApiTests extends FeatureTestCase
             'CONTENT_TYPE' => 'application/json'
         ];
         $this->post('/api/users/store', $data, [], $headers);
-        //$this->assertResponseOk();
+        $this->assertResponseOk();
         $response = $this->getArrayResponse();
-        //$this->assertGreaterThan(0, $response['id']);
-        //unset($response['id']);
+        $this->assertGreaterThan(0, $response['id']);
+        unset($response['id']);
         $expectedResponse = [
             'name' => $data['name'],
             'email' => $data['email'],
             'isAdmin' => false
         ];
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertEquals($expectedResponse, $response);
     }
 
     public function testAdminStoreIfInvalidName()
