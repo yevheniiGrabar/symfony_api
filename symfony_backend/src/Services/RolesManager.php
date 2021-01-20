@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Entity\Role;
 use App\Entity\User;
+use Doctrine\ORM\ORMException;
 use App\Repository\RoleRepository;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 
 class RolesManager
 {

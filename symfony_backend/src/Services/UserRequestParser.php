@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Repository\RoleRepository;
 use App\Requests\UserRequest;
-use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use App\Repository\RoleRepository;
+use Doctrine\ORM\OptimisticLockException;
 use Symfony\Component\HttpFoundation\Request;
 
 
@@ -32,8 +32,6 @@ class UserRequestParser
      */
     public function parseRequest(Request $request, bool $withRole = false): UserRequest
     {
-        $request = JsonRequestDataKeeper::keepJson($request);
-
         $parsedRequest = new UserRequest();
         $parsedRequest->name = (string)$request->get('name', '');
         $parsedRequest->email = (string)$request->get('email', '');

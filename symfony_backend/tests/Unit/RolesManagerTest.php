@@ -2,15 +2,15 @@
 
 namespace App\Tests\Unit;
 
+use Mockery;
 use App\Entity\Role;
 use App\Entity\User;
-use App\Repository\RoleRepository;
-use App\Services\RolesManager;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Mockery;
 use Mockery\MockInterface;
+use Doctrine\ORM\ORMException;
+use App\Services\RolesManager;
 use PHPUnit\Framework\TestCase;
+use App\Repository\RoleRepository;
+use Doctrine\ORM\OptimisticLockException;
 
 class RolesManagerTest extends TestCase
 {

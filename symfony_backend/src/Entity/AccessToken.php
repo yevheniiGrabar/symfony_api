@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use App\Repository\AccessTokenRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\AccessTokenRepository;
 
 /**
  * @ORM\Entity(repositoryClass=AccessTokenRepository::class)

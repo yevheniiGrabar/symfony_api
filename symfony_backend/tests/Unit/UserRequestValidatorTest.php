@@ -4,8 +4,8 @@ namespace App\Tests\Unit;
 
 use App\Entity\Role;
 use App\Requests\UserRequest;
-use App\Services\UserRequestValidator;
 use PHPUnit\Framework\TestCase;
+use App\Services\UserRequestValidator;
 
 class UserRequestValidatorTest extends TestCase
 {

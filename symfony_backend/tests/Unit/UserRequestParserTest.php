@@ -2,16 +2,16 @@
 
 namespace App\Tests\Unit;
 
+use Mockery;
 use App\Entity\Role;
-use App\Repository\RoleRepository;
+use Mockery\MockInterface;
 use App\Requests\UserRequest;
+use Doctrine\ORM\ORMException;
 use App\Services\RolesManager;
+use PHPUnit\Framework\TestCase;
+use App\Repository\RoleRepository;
 use App\Services\UserRequestParser;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Mockery;
-use Mockery\MockInterface;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
 class UserRequestParserTest extends TestCase

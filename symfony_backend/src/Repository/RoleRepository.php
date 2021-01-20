@@ -3,8 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Role;
-use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\ManagerRegistry;
 
 class RoleRepository extends AbstractRepository

@@ -1,11 +1,9 @@
 <?php
 
-
 namespace App\Tests\Unit;
 
-
-use App\Services\JsonRequestDataKeeper;
 use PHPUnit\Framework\TestCase;
+use App\Services\JsonRequestDataKeeper;
 use Symfony\Component\HttpFoundation\Request;
 
 class JsonRequestDataKeeperTest extends TestCase
