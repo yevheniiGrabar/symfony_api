@@ -39,7 +39,7 @@ class AuthApiTests extends FeatureTestCase
         $this->post('/api/register', [
             'name' => self::VALID_NAME,
             'email' => $email,
-            'password' => self::EXISTING_USER_PASSWORD,
+            'password' => self::WEAK_PASSWORD,
         ]);
         $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }

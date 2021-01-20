@@ -51,7 +51,6 @@ class UserRequestValidatorTest extends TestCase
         $this->assertCount(2, $violations);
         $errorMessage = (string)$violations;
         $this->assertStringContainsString(UserRequestValidator::NAME_IS_TOO_SHORT_MESSAGE, $errorMessage);
-        //$this->assertTrue(strpos($errorMessage, 'Name') !== false);
     }
 
     public function testValidateWithShortName()

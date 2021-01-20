@@ -19,7 +19,6 @@ class UsersApiTests extends FeatureTestCase
 
     public function testShow(): void
     {
-//        $newUserData = $this->registerAndLoginAsNewUser();
         $this->loginAsUser();
         $response = $this->getArrayResponse();
 
