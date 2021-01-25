@@ -13,6 +13,7 @@
         "doctrine/doctrine-bundle": "^2.2",
         "doctrine/doctrine-migrations-bundle": "^3.0",
         "doctrine/orm": "^2.8",
+        "gesdinet/jwt-refresh-token-bundle": "^0.10.1",
         "guzzlehttp/guzzle": "^7.0",
         "lexik/jwt-authentication-bundle": "^2.10",
         "mockery/mockery": "^1.4",
@@ -24,7 +25,8 @@
         "symfony/proxy-manager-bridge": "5.2.*",
         "symfony/security-bundle": "5.2.*",
         "symfony/validator": "5.2.*",
-        "symfony/yaml": "5.2.*"
+        "symfony/yaml": "5.2.*",
+      "ext-openssl": "*"
     },
     "config": {
         "optimize-autoloader": true,

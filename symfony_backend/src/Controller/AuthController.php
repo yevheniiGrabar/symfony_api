@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\RefreshToken;
 use App\Entity\User;
+use App\Repository\RefreshTokenRepository;
 use Doctrine\ORM\ORMException;
 use App\Services\RolesManager;
 use App\Repository\UserRepository;
@@ -30,10 +32,19 @@ class AuthController extends AbstractController
     /** @var UserRequestParser */
     private UserRequestParser $userRequestParser;
 
-    public function __construct(UserRepository $userRepository, UserRequestParser $userRequestParser)
+    /** @var RefreshTokenRepository */
+    private RefreshTokenRepository $refreshTokenRepository;
+
+
+    public function __construct(
+        UserRepository $userRepository,
+        UserRequestParser $userRequestParser,
+        RefreshTokenRepository $refreshTokenRepository
+    )
     {
         $this->userRepository = $userRepository;
         $this->userRequestParser = $userRequestParser;
+        $this->refreshTokenRepository = $refreshTokenRepository;
     }
 
     /**
@@ -86,6 +97,7 @@ class AuthController extends AbstractController
         RolesManager $rolesManager
     ): JsonResponse
     {
+
         $request = $this->userRequestParser->parseRequest($request);
 
         /** @var User|null $user */
@@ -103,10 +115,18 @@ class AuthController extends AbstractController
         $token = $tokenManager->createFromPayload($user, $user->toArray());
         $authHandler->handleAuthenticationSuccess($user, $token);
 
-        return new JsonResponse(['token' => $token]);
+        /** @var RefreshToken|null $userToken */
+        $userToken = $this->refreshTokenRepository->findOneBy(['username' => $request->email], ['id' => 'DESC']);
+
+        if (!$userToken) {
+            return new JsonResponse(['errors' => 'Refresh Token not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse(['token' => $token, 'refresh_token' => $userToken->refresh_token]);
     }
 
     /**
+     *
      * @Route("/current", name="current", methods={"GET"})
      * @param TokenStorageInterface $storage
      * @return JsonResponse

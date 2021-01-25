@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\RefreshTokenRepository;
 use App\Services\RolesManager;
 use Doctrine\ORM\ORMException;
 use App\Repository\UserRepository;
@@ -30,15 +31,21 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
     /** @var UserRequestParser */
     private UserRequestParser $userRequestParser;
 
+    /** @var RefreshTokenRepository */
+    private RefreshTokenRepository $refreshTokenRepository;
+
     public function __construct(
         UserRepository $userRepository,
         RolesManager $rolesManager,
-        UserRequestParser $userRequestParser
+        UserRequestParser $userRequestParser,
+        RefreshTokenRepository $refreshTokenRepository
+
     )
     {
         $this->userRepository = $userRepository;
         $this->rolesManager = $rolesManager;
         $this->userRequestParser = $userRequestParser;
+        $this->refreshTokenRepository = $refreshTokenRepository;
     }
 
     /**
@@ -133,6 +140,11 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         $user->setIsAdmin($this->rolesManager->isAdmin($user));
         $this->userRepository->plush($user);
 
+        $oldEmail = $user->getEmail();
+        $this->userRepository->plush($user);
+        $newEmail = $user->getEmail();
+        $this->refreshTokenRepository->updateTokenEmail($oldEmail, $newEmail);
+
         return new JsonResponse($user->toArray());
     }
 
@@ -155,6 +167,8 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         if (!$removed) {
             return new JsonResponse(['errors' => 'Entity was not removed'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+        $this->refreshTokenRepository->removeAllByEmail($user->getEmail());
 
         return new JsonResponse(['success' => true]);
     }
