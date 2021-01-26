@@ -2,10 +2,7 @@
 
 namespace App\Tests\Feature;
 
-use App\Entity\RefreshToken;
-use App\Repository\RefreshTokenRepository;
 use App\Tests\TestCases\FeatureTestCase;
-use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthApiTests extends FeatureTestCase
@@ -117,7 +114,6 @@ class AuthApiTests extends FeatureTestCase
         $this->assertGreaterThan(0, strlen($response['token']));
         $this->assertEquals($refreshToken, $response['refresh_token']);
 
-        $response = $this->getArrayResponse();
         $this->get('/api/users/show/' . self::EXISTING_USER_ID, [], [], [
             'HTTP_AUTHORIZATION' => 'Bearer ' . $response['token'],
             'CONTENT_TYPE' => 'application/json'
@@ -137,10 +133,12 @@ class AuthApiTests extends FeatureTestCase
         $this->post('/api/token/refresh', [
             'refresh_token' => self::EXPIRED_TOKEN
         ]);
-
         $response = $this->getArrayResponse();
-        //dd($response);
-        $this->assertResponseStatus(Response::HTTP_NOT_FOUND);
+        $this->assertResponseStatus(Response::HTTP_UNAUTHORIZED);
+        $expectedResponse = [
+            'errors' => 'Expired refresh token'
+        ];
+        $this->assertEquals($expectedResponse, $response);
     }
 
     public function testLoginWithIncorrectEmail(): void

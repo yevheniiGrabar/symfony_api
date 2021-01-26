@@ -174,12 +174,8 @@ class AuthController extends AbstractController
             return new JsonResponse(['errors' => 'Expired refresh token'], Response::HTTP_UNAUTHORIZED);
         }
 
-        /** @var User|null $user */
+        /** @var User $user */
         $user = $this->userRepository->findOneBy(['email' => $refreshTokenEntity->getUsername()]);
-
-        if (!$user) {
-            return new JsonResponse(['errors' => 'User not found'], Response::HTTP_NOT_FOUND);
-        }
 
         $user->setIsAdmin($rolesManager->isAdmin($user));
         $token = $tokenManager->createFromPayload($user, $user->toArray());

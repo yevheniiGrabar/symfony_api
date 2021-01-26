@@ -48,8 +48,6 @@ services:
       dockerfile: ../docker/images/symfony/Dockerfile
     env_file:
       - ../symfony_backend/.env
-#    environment:
-#      SALT: "${SALT:-secureSalt}"
     depends_on:
       - db
     ports:
@@ -57,4 +55,3 @@ services:
     volumes:
       - ../symfony_backend:/var/www/html
       - symfony_backend_vendor:/var/www/html/vendor
-
