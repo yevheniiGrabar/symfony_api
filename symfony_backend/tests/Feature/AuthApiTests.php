@@ -90,8 +90,27 @@ class AuthApiTests extends FeatureTestCase
         $this->assertResponseOk();
         $response = $this->getArrayResponse();
         $this->assertArrayHasKey('token', $response);
+        $this->assertArrayHasKey('refresh_token', $response);
         $token = $response['token'];
+        $refreshToken = $response['refresh_token'];
         $this->assertGreaterThan(0, strlen($token));
+        $this->assertGreaterThan(0, strlen($refreshToken));
+    }
+
+    public function testLoginWithRefreshToken(): void
+    {
+        $this->loginAsUser();
+        $this->assertResponseOk();
+        $response = $this->getArrayResponse();
+        $this->assertArrayHasKey('token', $response);
+        $this->assertArrayHasKey('refresh_token', $response);
+        $token = $response['token'];
+        $refreshToken = $response['refresh_token'];
+
+        $this->get('api/token/refresh',[
+            'refresh_token' => $refreshToken
+        ]);
+        $this->assertResponseStatus(Response::HTTP_OK);
     }
 
     public function testLoginWithIncorrectEmail(): void

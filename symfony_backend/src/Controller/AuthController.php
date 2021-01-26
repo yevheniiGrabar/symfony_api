@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\RefreshToken;
 use App\Entity\User;
 use App\Repository\RefreshTokenRepository;
+use Carbon\Carbon;
 use Doctrine\ORM\ORMException;
 use App\Services\RolesManager;
 use App\Repository\UserRepository;
@@ -137,5 +138,53 @@ class AuthController extends AbstractController
         $user = $storage->getToken()->getUser();
 
         return new JsonResponse($user->toArray());
+    }
+
+    /**
+     * @Route("/token/refresh", name="refresh_token", methods={"POST"})
+     * @param Request $request
+     * @param JWTTokenManagerInterface $tokenManager
+     * @param AuthenticationSuccessHandler $authHandler
+     * @param RolesManager $rolesManager
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function refreshUserAction
+    (
+        Request $request,
+        JWTTokenManagerInterface $tokenManager,
+        AuthenticationSuccessHandler $authHandler,
+        RolesManager $rolesManager
+    ): JsonResponse
+    {
+        $refreshToken = (string)$request->get('refresh_token', '');
+
+        /** @var RefreshToken|null $refreshTokenEntity */
+        $refreshTokenEntity = $this->refreshTokenRepository->findOneBy(['refresh_token' => $refreshToken]);
+
+        if (!$refreshTokenEntity) {
+            return new JsonResponse(['errors' => 'Refresh Token not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $currentDate = Carbon::now();
+        $refreshTokenDate = Carbon::parse($refreshTokenEntity->getValid());
+
+        if ($currentDate > $refreshTokenDate) {
+            return new JsonResponse(['errors' => 'Expired refresh token'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        /** @var User|null $user */
+        $user = $this->userRepository->findOneBy(['email' => $refreshTokenEntity->getUsername()]);
+
+        if (!$user) {
+            return new JsonResponse(['errors' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $user->setIsAdmin($rolesManager->isAdmin($user));
+        $token = $tokenManager->createFromPayload($user, $user->toArray());
+        $authHandler->handleAuthenticationSuccess($user, $token);
+
+        return new JsonResponse(['token' => $token, 'refresh_token' => $refreshToken]);
     }
 }
