@@ -2,7 +2,10 @@
 
 namespace App\Tests\Feature;
 
+use App\Entity\RefreshToken;
+use App\Repository\RefreshTokenRepository;
 use App\Tests\TestCases\FeatureTestCase;
+use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthApiTests extends FeatureTestCase
@@ -97,20 +100,47 @@ class AuthApiTests extends FeatureTestCase
         $this->assertGreaterThan(0, strlen($refreshToken));
     }
 
-    public function testLoginWithRefreshToken(): void
+
+    public function testRefreshAction(): void
     {
         $this->loginAsUser();
         $this->assertResponseOk();
         $response = $this->getArrayResponse();
-        $this->assertArrayHasKey('token', $response);
         $this->assertArrayHasKey('refresh_token', $response);
-        $token = $response['token'];
         $refreshToken = $response['refresh_token'];
 
-        $this->get('api/token/refresh',[
+        $this->post('/api/token/refresh', [
             'refresh_token' => $refreshToken
         ]);
-        $this->assertResponseStatus(Response::HTTP_OK);
+
+        $response = $this->getArrayResponse();
+        $this->assertGreaterThan(0, strlen($response['token']));
+        $this->assertEquals($refreshToken, $response['refresh_token']);
+
+        $response = $this->getArrayResponse();
+        $this->get('/api/users/show/' . self::EXISTING_USER_ID, [], [], [
+            'HTTP_AUTHORIZATION' => 'Bearer ' . $response['token'],
+            'CONTENT_TYPE' => 'application/json'
+        ]);
+        $response = $this->getArrayResponse();
+        $expectedResponseAfterShowAction = [
+            'id' => self::EXISTING_USER_ID,
+            'name' => self::EXISTING_USER_NAME,
+            'email' => self::EXISTING_USER_EMAIL,
+            'isAdmin' => false,
+        ];
+        $this->assertEquals($expectedResponseAfterShowAction, $response);
+    }
+
+    public function testRefreshActionIfExpiredRefreshToken(): void
+    {
+        $this->post('/api/token/refresh', [
+            'refresh_token' => self::EXPIRED_TOKEN
+        ]);
+
+        $response = $this->getArrayResponse();
+        //dd($response);
+        $this->assertResponseStatus(Response::HTTP_NOT_FOUND);
     }
 
     public function testLoginWithIncorrectEmail(): void
