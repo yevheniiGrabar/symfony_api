@@ -184,3 +184,4 @@ class AuthController extends AbstractController
         return new JsonResponse(['token' => $token, 'refresh_token' => $refreshToken]);
     }
 }
+

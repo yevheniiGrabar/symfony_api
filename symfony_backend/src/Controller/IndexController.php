@@ -19,3 +19,4 @@ class IndexController extends AbstractController
         return new JsonResponse($request->request->all());
     }
 }
+

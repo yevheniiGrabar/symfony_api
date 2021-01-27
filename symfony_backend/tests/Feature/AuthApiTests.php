@@ -196,7 +196,7 @@ class AuthApiTests extends FeatureTestCase
         $response = $this->getArrayResponse();
         $this->assertResponseOk();
 
-        $expectedResponse  = [
+        $expectedResponse = [
             'id' => self::EXISTING_USER_ID,
             'name' => $newData['name'],
             'email' => $newData['email'],
@@ -219,6 +219,7 @@ class AuthApiTests extends FeatureTestCase
         ]);
 
         $response = $this->getArrayResponse();
-        $this->assertEquals($newData['email'], $response['email'] );
+        $this->assertEquals($newData['email'], $response['email']);
     }
 }
+

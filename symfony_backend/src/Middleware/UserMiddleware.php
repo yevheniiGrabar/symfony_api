@@ -3,6 +3,7 @@
 namespace App\Middleware;
 
 use App\Entity\User;
+use App\Services\RolesManager;
 use App\Services\UserRequestParser;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,16 +25,21 @@ class UserMiddleware implements EventSubscriberInterface
     /** @var TokenStorageInterface */
     private TokenStorageInterface $tokenStorageInterface;
 
+    /** @var RolesManager */
+    private RolesManager $rolesManager;
+
     public function __construct
     (
         UrlGeneratorInterface $router,
         UserRequestParser $userRequestParser,
-        TokenStorageInterface $storage
+        TokenStorageInterface $storage,
+        RolesManager $rolesManager
     )
     {
         $this->router = $router;
         $this->userRequestParser = $userRequestParser;
         $this->tokenStorageInterface = $storage;
+        $this->rolesManager = $rolesManager;
     }
 
     /** @param ControllerEvent $event */
@@ -50,6 +56,7 @@ class UserMiddleware implements EventSubscriberInterface
             return;
         }
 
+        $request = $event->getRequest();
         $user = $this->tokenStorageInterface->getToken()->getUser();
 
         if (!$user instanceof User) {
@@ -60,13 +67,14 @@ class UserMiddleware implements EventSubscriberInterface
             return;
         }
 
-        $request = $event->getRequest();
         $defaultUserEndpoints = $this->userEndpoints($user->getId());
         $requestUri = $request->getRequestUri();
 
         if (!in_array($requestUri, $defaultUserEndpoints)) {
             throw new HttpException(Response::HTTP_FORBIDDEN, 'Access denied');
         }
+        $roleId = (int)$this->rolesManager->getDefaultRole()->getId();
+        $request->request->set('role_id', $roleId);
     }
 
     /** @return array */
@@ -90,3 +98,4 @@ class UserMiddleware implements EventSubscriberInterface
         ];
     }
 }
+

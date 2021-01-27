@@ -199,3 +199,4 @@ class AdminsApiTests extends FeatureTestCase
         return array_merge($this->getArrayResponse(), ['token' => $token]);
     }
 }
+

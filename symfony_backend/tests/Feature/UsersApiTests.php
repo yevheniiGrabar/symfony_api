@@ -48,7 +48,6 @@ class UsersApiTests extends FeatureTestCase
             'name' => $newName,
             'email' => $newEmail,
             'password' => $newPassword,
-            'role_id' => 2
         ];
         $this->put('/api/users/update/' . $newUserData['id'], $newData, [], [
             'HTTP_AUTHORIZATION' => 'Bearer ' . $newUserData['token'],
@@ -63,6 +62,27 @@ class UsersApiTests extends FeatureTestCase
             'isAdmin' => false
         ];
         $this->assertEquals($expectedResponse, $response);
+    }
+
+    public function testUpdateIfAdminRole()
+    {
+        $this->loginAsUser();
+        $this->assertResponseOk();
+        $response = $this->getArrayResponse();
+        $token = $response['token'];
+        $newData = [
+            'name' => 'SomeName',
+            'email' => 'newEmail@email.com',
+            'password' => 'NeWPasWord!2341**',
+            'role_id' => 1,
+        ];
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, $newData, [], [
+            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
+            'CONTENT_TYPE' => 'application/json',
+        ]);
+        $response = $this->getArrayResponse();
+        $this->assertResponseOk();
+        $this->assertFalse($response['isAdmin']);
     }
 
     public function testUpdateWithExistingEmail()
@@ -205,5 +225,5 @@ class UsersApiTests extends FeatureTestCase
         ]);
         $this->assertResponseStatus(Response::HTTP_FORBIDDEN);
     }
-
 }
+
