@@ -54,3 +54,4 @@ abstract class AbstractRepository extends ServiceEntityRepository
     /** @return string */
     abstract protected function getModel(): string;
 }
+

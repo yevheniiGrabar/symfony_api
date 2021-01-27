@@ -281,3 +281,4 @@ class User implements EntityInterface, JWTUserInterface
         return $user;
     }
 }
+

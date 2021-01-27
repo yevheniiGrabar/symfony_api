@@ -224,3 +224,4 @@ class FeatureTestCase extends WebTestCase
         ];
     }
 }
+

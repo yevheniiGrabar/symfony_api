@@ -74,3 +74,4 @@ class UserRequestValidator
         return $violations;
     }
 }
+

@@ -174,3 +174,4 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         return new JsonResponse(['success' => true]);
     }
 }
+

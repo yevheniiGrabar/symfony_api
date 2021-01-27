@@ -112,3 +112,4 @@ class Role implements EntityInterface
         return $this;
     }
 }
+

@@ -36,7 +36,6 @@ class AuthController extends AbstractController
     /** @var RefreshTokenRepository */
     private RefreshTokenRepository $refreshTokenRepository;
 
-
     public function __construct(
         UserRepository $userRepository,
         UserRequestParser $userRequestParser,

@@ -12,6 +12,9 @@ class RefreshTokenRepository extends AbstractRepository
         parent::__construct($registry);
     }
 
+    /**
+     * @return string
+     */
     protected function getModel(): string
     {
         return RefreshToken::class;

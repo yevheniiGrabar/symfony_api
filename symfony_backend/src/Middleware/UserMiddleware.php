@@ -73,6 +73,7 @@ class UserMiddleware implements EventSubscriberInterface
         if (!in_array($requestUri, $defaultUserEndpoints)) {
             throw new HttpException(Response::HTTP_FORBIDDEN, 'Access denied');
         }
+
         $roleId = (int)$this->rolesManager->getDefaultRole()->getId();
         $request->request->set('role_id', $roleId);
     }

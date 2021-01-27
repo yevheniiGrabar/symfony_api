@@ -18,7 +18,7 @@ class RefreshToken implements EntityInterface
      * @ORM\Column(type="integer")
      * @var int
      */
-    private ?int $id = null;
+    private int $id;
 
     /**
      * @ORM\Column(type="string", length=128)
@@ -30,7 +30,7 @@ class RefreshToken implements EntityInterface
      * @ORM\Column(type="string", length=255)
      * @var string
      */
-    public string $username;
+    private string $username;
 
     /**
      * @ORM\Column(type="datetime")
@@ -116,3 +116,4 @@ class RefreshToken implements EntityInterface
         return $this;
     }
 }
+

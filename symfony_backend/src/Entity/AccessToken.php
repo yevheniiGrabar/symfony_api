@@ -77,3 +77,4 @@ class AccessToken implements EntityInterface
         return $this;
     }
 }
+

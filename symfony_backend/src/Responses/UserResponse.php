@@ -16,3 +16,4 @@ class UserResponse
     /** @var bool */
     public bool $isAdmin = false;
 }
+
