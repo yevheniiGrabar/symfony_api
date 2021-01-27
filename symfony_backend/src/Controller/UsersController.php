@@ -133,17 +133,18 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
             return new JsonResponse(['errors' => 'This email already in use'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $oldEmail = $user->getEmail();
         $user->setName($request->name);
         $user->setEmail($request->email);
         $user->setPassword($encoder->encodePassword($user, $request->password));
         $user->setRole($request->role);
         $user->setIsAdmin($this->rolesManager->isAdmin($user));
         $this->userRepository->plush($user);
-
-        $oldEmail = $user->getEmail();
-        $this->userRepository->plush($user);
         $newEmail = $user->getEmail();
-        $this->refreshTokenRepository->updateTokenEmail($oldEmail, $newEmail);
+
+        if ($oldEmail != $newEmail) {
+            $this->refreshTokenRepository->updateTokenEmail($oldEmail, $newEmail);
+        }
 
         return new JsonResponse($user->toArray());
     }

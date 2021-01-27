@@ -21,7 +21,6 @@ class UsersApiTests extends FeatureTestCase
     {
         $this->loginAsUser();
         $response = $this->getArrayResponse();
-
         $token = $response['token'];
 
         $this->get('/api/users/show/' . self::EXISTING_USER_ID, [], [], [
@@ -206,4 +205,5 @@ class UsersApiTests extends FeatureTestCase
         ]);
         $this->assertResponseStatus(Response::HTTP_FORBIDDEN);
     }
+
 }
