@@ -2,16 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\RefreshToken;
-use App\Entity\User;
-use App\Repository\RefreshTokenRepository;
 use Carbon\Carbon;
+use App\Entity\User;
+use App\Entity\RefreshToken;
 use Doctrine\ORM\ORMException;
 use App\Services\RolesManager;
 use App\Repository\UserRepository;
 use App\Services\UserRequestParser;
 use App\Services\UserRequestValidator;
 use Doctrine\ORM\OptimisticLockException;
+use App\Repository\RefreshTokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

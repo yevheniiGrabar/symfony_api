@@ -97,7 +97,6 @@ class AuthApiTests extends FeatureTestCase
         $this->assertGreaterThan(0, strlen($refreshToken));
     }
 
-
     public function testRefreshAction(): void
     {
         $this->loginAsUser();
