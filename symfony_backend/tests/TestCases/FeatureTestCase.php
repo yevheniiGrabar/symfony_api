@@ -18,7 +18,7 @@ class FeatureTestCase extends WebTestCase
     protected const EXISTING_USER_EMAIL = 'user@email.com';
     protected const EXISTING_USER_PASSWORD = 'password';
     protected const SHORT_NAME = 'S';
-    protected const WEAK_PASSWORD = '111';
+    protected const WEAK_PASSWORD = '*1QwE';
     protected const VALID_PASSWORD = 'SoMeSeCuRePaSsWoRd54535251!!!';
     protected const VALID_NAME = 'SomeUsername';
     protected const VALID_EMAIL = 'NewValideamail@email.com';
@@ -27,6 +27,16 @@ class FeatureTestCase extends WebTestCase
     protected const NEW_USER_NAME = 'newName';
     protected const NEW_USER_EMAIL = 'newUserEmail@email.com';
     protected const ROLE_ID = 2;
+    public const NAME_IS_TOO_SHORT_MESSAGE = 'Name is too short';
+    public const NAME_IS_REQUIRED_MESSAGE = 'Name is required';
+    public const EMAIL_ALREADY_IN_USE_MESSAGE = 'This email is already in use';
+    public const EMAIL_IS_REQUIRED_MESSAGE = 'Email is required';
+    public const EMAIL_IS_SHORT_MESSAGE = '';
+    public const PASSWORD_IS_TOO_SHORT_MESSAGE = 'Password is too short ';
+    public const PASSWORD_IS_REQUIRED_MESSAGE = 'Password is required';
+    public const PASSWORD_IS_INVALID_MESSAGE = 'Invalid password';
+    public const EXPIRE_REFRESH_TOKEN_MESSAGE = 'Expired refresh token';
+    public const USER_NOT_FOUND_MESSAGE = 'User not found';
 
     /** @var KernelBrowser|null */
     protected static ?KernelBrowser $anonClient = null;
