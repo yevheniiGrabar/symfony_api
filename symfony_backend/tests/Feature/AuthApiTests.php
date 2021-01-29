@@ -5,221 +5,208 @@ namespace App\Tests\Feature;
 use App\Tests\TestCases\FeatureTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @todo: Assert response messages
+ */
 class AuthApiTests extends FeatureTestCase
 {
-    public function testRegister(): void
-    {
-        $email = $this->registerAsUser();
-        $this->assertResponseOk();
-        $response = $this->getArrayResponse();
-        $this->assertArrayHasKey('id', $response);
-        $this->assertGreaterThan(0, $response['id']);
-        unset($response['id']);
-        $expectedResponse = [
-            'name' => self::VALID_NAME,
-            'email' => $email,
-            'isAdmin' => false
-        ];
-        $this->assertEquals($expectedResponse, $response);
-    }
-
-    public function testRegisterWithExistingEmail(): void
+    public function testRegister()
     {
         $this->post('/api/register', [
-            'name' => self::VALID_NAME,
-            'email' => self::EXISTING_USER_EMAIL,
+            'name' => self::NEW_USER_NAME,
+            'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
         ]);
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertArrayHasKey('id', $this->response);
+        $this->assertGreaterThan(0, $this->response);
+        unset($this->response['id']);
+        $this->assertResponse([
+            'name' => self::NEW_USER_NAME,
+            'email' => self::NEW_USER_EMAIL,
+            'isAdmin' => false,
+        ]);
     }
 
-    public function testRegisterWithWeakPassword(): void
+    public function testRegisterWithExistingEmail()
     {
-        $email = $this->getNonExistingValidEmail();
         $this->post('/api/register', [
-            'name' => self::VALID_NAME,
-            'email' => $email,
+            'name' => self::NEW_USER_NAME,
+            'email' => self::EXISTING_USER_EMAIL,
+            'password' => self::VALID_PASSWORD
+        ]);
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function testRegisterWithWeakPassword()
+    {
+        $this->post('/api/register', [
+            'name' => self::NEW_USER_NAME,
+            'email' => self::EXISTING_USER_EMAIL,
+            'password' => self::WEAK_PASSWORD,
+            'role_id' => self::ROLE_ID
+        ]);
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function testRegisterWithoutName()
+    {
+        $this->post('/api/register', [
+            'name' => '',
+            'email' => self::EXISTING_USER_EMAIL,
             'password' => self::WEAK_PASSWORD,
         ]);
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function testRegisterWithoutName(): void
-    {
-        $email = $this->getNonExistingValidEmail();
-        $this->post('/api/register', [
-            'email' => $email,
-            'password' => self::VALID_PASSWORD,
-        ]);
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-    }
-
-    public function testRegisterWithoutShortName(): void
-    {
-        $email = $this->getNonExistingValidEmail();
-        $this->post('/api/register', [
-            'name' => 'A',
-            'email' => $email,
-            'password' => self::VALID_PASSWORD,
-        ]);
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-    }
-
-    public function testRegisterWithoutEmail(): void
+    public function testRegisterWithoutShortName()
     {
         $this->post('/api/register', [
-            'name' => self::VALID_NAME,
-            'password' => self::VALID_PASSWORD,
+            'name' => self::SHORT_NAME,
+            'email' => self::EXISTING_USER_EMAIL,
+            'password' => self::WEAK_PASSWORD,
         ]);
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function testRegisterWithoutPassword(): void
+    public function testRegisterWithoutEmail()
     {
-        $email = $this->getNonExistingValidEmail();
         $this->post('/api/register', [
-            'name' => self::VALID_NAME,
-            'email' => $email,
+            'name' => self::SHORT_NAME,
+            'email' => '',
+            'password' => self::WEAK_PASSWORD,
         ]);
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function testLogin(): void
+    public function testRegisterWithoutPassword()
     {
-        $this->loginAsUser();
+        $this->post('/api/register', [
+            'name' => self::SHORT_NAME,
+            'email' => self::NEW_USER_EMAIL,
+            'password' => '',
+        ]);
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function testLogin()
+    {
+        $this->post('/api/login', [
+            'email' => self::EXISTING_USER_EMAIL,
+            'password' => self::EXISTING_USER_PASSWORD,
+        ]);
+        $this->assertArrayHasKey('token', $this->response);
+        $this->assertArrayHasKey('refresh_token', $this->response);
+        $this->assertGreaterThan(0, strlen($this->response['token']));
+        $this->assertGreaterThan(0, strlen($this->response['refresh_token']));
+    }
+
+    /**
+     * @todo: Check why does it return same access token after refresh
+     */
+    public function testRefreshAction()
+    {
+        $this->post('/api/login', [
+            'email' => self::EXISTING_USER_EMAIL,
+            'password' => self::EXISTING_USER_PASSWORD,
+        ]);
         $this->assertResponseOk();
-        $response = $this->getArrayResponse();
-        $this->assertArrayHasKey('token', $response);
-        $this->assertArrayHasKey('refresh_token', $response);
-        $token = $response['token'];
-        $refreshToken = $response['refresh_token'];
-        $this->assertGreaterThan(0, strlen($token));
-        $this->assertGreaterThan(0, strlen($refreshToken));
-    }
-
-    public function testRefreshAction(): void
-    {
-        $this->loginAsUser();
-        $this->assertResponseOk();
-        $response = $this->getArrayResponse();
-        $this->assertArrayHasKey('refresh_token', $response);
-        $refreshToken = $response['refresh_token'];
-
         $this->post('/api/token/refresh', [
-            'refresh_token' => $refreshToken
+            'refresh_token' => $this->response['refresh_token']
         ]);
-
-        $response = $this->getArrayResponse();
-        $this->assertGreaterThan(0, strlen($response['token']));
-        $this->assertEquals($refreshToken, $response['refresh_token']);
-
-        $this->get('/api/users/show/' . self::EXISTING_USER_ID, [], [], [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $response['token'],
-            'CONTENT_TYPE' => 'application/json'
-        ]);
-        $response = $this->getArrayResponse();
-        $expectedResponseAfterShowAction = [
+        $this->assertResponseOk();
+        $this->assertArrayHasKey('token', $this->response);
+        $this->assertArrayHasKey('refresh_token', $this->response);
+        $this->assertGreaterThan(0, strlen($this->response['token']));
+        $this->assertGreaterThan(0, strlen($this->response['refresh_token']));
+        self::$anonClient->setServerParameter('HTTP_Authorization', sprintf('Bearer %s',  $this->response['token']));
+        $this->get('/api/current');
+        $this->assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::EXISTING_USER_NAME,
             'email' => self::EXISTING_USER_EMAIL,
             'isAdmin' => false,
-        ];
-        $this->assertEquals($expectedResponseAfterShowAction, $response);
+        ]);
+        self::$anonClient->setServerParameter('HTTP_Authorization', '');
     }
 
-    public function testRefreshActionIfExpiredRefreshToken(): void
+    public function testRefreshActionIfExpiredRefreshToken()
     {
         $this->post('/api/token/refresh', [
             'refresh_token' => self::EXPIRED_TOKEN
         ]);
-        $response = $this->getArrayResponse();
-        $this->assertResponseStatus(Response::HTTP_UNAUTHORIZED);
-        $expectedResponse = [
+        $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
+        $this->assertResponse([
             'errors' => 'Expired refresh token'
-        ];
-        $this->assertEquals($expectedResponse, $response);
+        ]);
     }
 
-    public function testLoginWithIncorrectEmail(): void
+    public function testLoginWithIncorrectEmail()
     {
         $this->post('/api/login', [
-            'email' => $this->getNonExistingValidEmail(),
+            'email' => self::INVALID_EMAIL,
             'password' => self::EXISTING_USER_PASSWORD,
         ]);
-        $this->assertResponseStatus(Response::HTTP_NOT_FOUND);
+        $this->assertStatusCode(Response::HTTP_NOT_FOUND);
     }
 
-    public function testLoginWithIncorrectPassword(): void
+    public function testLoginWithIncorrectPassword()
     {
         $this->post('/api/login', [
             'email' => self::EXISTING_USER_EMAIL,
-            'password' => 'wrongPassword',
+            'password' => self::VALID_PASSWORD,
         ]);
-        $this->assertResponseStatus(Response::HTTP_UNAUTHORIZED);
+        $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function testLoginWithoutPassword(): void
+    public function testLoginWithoutPassword()
     {
         $this->post('/api/login', [
             'email' => self::EXISTING_USER_EMAIL,
+            'password' => '',
         ]);
-        $this->assertResponseStatus(Response::HTTP_UNAUTHORIZED);
+        $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function testLoginWithoutEmail(): void
+    public function testLoginWithoutEmail()
     {
         $this->post('/api/login', [
-            'password' => self::EXISTING_USER_PASSWORD,
+            'email' => '',
+            'password' => self::VALID_PASSWORD,
         ]);
-        $this->assertResponseStatus(Response::HTTP_NOT_FOUND);
+        $this->assertStatusCode(Response::HTTP_NOT_FOUND);
     }
-
 
     public function testRefreshActionAfterUpdateEmail()
     {
-        $this->loginAsUser();
-        $this->assertResponseOk();
-        $response = $this->getArrayResponse();
-        $token = $response['token'];
-        $refreshToken = $response['refresh_token'];
-
-        $newData = [
-            'name' => 'user',
-            'email' => 'newUserEmail@email.com',
-            'password' => 'NeWPasWord!2341**',
-            'role_id' => 2
-        ];
-        $this->put('/api/users/update/' . self::EXISTING_USER_ID, $newData, [], [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
-            'CONTENT_TYPE' => 'application/json',
+        $this->post('/api/login', [
+            'email' => self::EXISTING_USER_EMAIL,
+            'password' => self::EXISTING_USER_PASSWORD,
         ]);
-        $response = $this->getArrayResponse();
-        $this->assertResponseOk();
-
-        $expectedResponse = [
+        $refreshToken = $this->response['refresh_token'];
+        self::$anonClient->setServerParameter('HTTP_Authorization', sprintf('Bearer %s',  $this->response['token']));
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
+            'name' => self::NEW_USER_NAME,
+            'email' => self::NEW_USER_EMAIL,
+            'password' => self::VALID_PASSWORD,
+        ]);
+        $this->assertResponse([
             'id' => self::EXISTING_USER_ID,
-            'name' => $newData['name'],
-            'email' => $newData['email'],
-            'isAdmin' => false
-        ];
-
-        $this->assertEquals($expectedResponse, $response);
-
+            'name' => self::NEW_USER_NAME,
+            'email' => self::NEW_USER_EMAIL,
+            'isAdmin' => false,
+        ]);
+        self::$anonClient->setServerParameter('HTTP_Authorization', '');
         $this->post('/api/token/refresh', [
             'refresh_token' => $refreshToken
         ]);
-        $response = $this->getArrayResponse();
-        $this->assertGreaterThan(0, strlen($response['token']));
-        $this->assertEquals($refreshToken, $response['refresh_token']);
-        $newAccessToken = $response['token'];
-
-        $this->get('/api/users/show/' . self::EXISTING_USER_ID, [], [], [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $newAccessToken,
-            'CONTENT_TYPE' => 'application/json',
+        self::$anonClient->setServerParameter('HTTP_Authorization', sprintf('Bearer %s',  $this->response['token']));
+        $this->get('/api/users/show/' . self::EXISTING_USER_ID);
+        $this->assertResponse([
+            'id' => self::EXISTING_USER_ID,
+            'name' => self::NEW_USER_NAME,
+            'email' => self::NEW_USER_EMAIL,
+            'isAdmin' => false,
         ]);
-
-        $response = $this->getArrayResponse();
-        $this->assertEquals($newData['email'], $response['email']);
+        self::$anonClient->setServerParameter('HTTP_Authorization', '');
     }
 }
-

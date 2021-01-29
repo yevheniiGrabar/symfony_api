@@ -9,194 +9,101 @@ class AdminsApiTests extends FeatureTestCase
 {
     public function testAdminStore()
     {
-        $this->loginAsAdmin();
-        $response = $this->getArrayResponse();
-        $token = $response['token'];
-        $data = [
+        $this->post('/api/users/store', [
             'name' => self::VALID_NAME,
-            'email' => $this->getNonExistingValidEmail(),
+            'email' => self::VALID_EMAIL,
             'password' => self::VALID_PASSWORD,
-            'role_id' => '2'
-        ];
-        $headers = [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
-            'CONTENT_TYPE' => 'application/json'
-        ];
-        $this->post('/api/users/store', $data, [], $headers);
-        $this->assertResponseOk();
-        $response = $this->getArrayResponse();
-        $this->assertGreaterThan(0, $response['id']);
-        unset($response['id']);
-        $expectedResponse = [
-            'name' => $data['name'],
-            'email' => $data['email'],
+            'role_id' => 2
+        ], $this->getAdminAuthClient());
+        $this->assertArrayHasKey('id', $this->response);
+        $this->assertGreaterThan(0, $this->response);
+        unset($this->response['id']);
+        $this->assertResponse([
+            'name' => self::VALID_NAME,
+            'email' => self::VALID_EMAIL,
             'isAdmin' => false
-        ];
-        $this->assertEquals($expectedResponse, $response);
+        ]);
+
     }
 
     public function testAdminStoreIfWrongRole()
     {
-        $this->loginAsAdmin();
-        $response = $this->getArrayResponse();
-        $token = $response['token'];
-        $data = [
+        $this->post('/api/users/store', [
             'name' => self::VALID_NAME,
-            'email' => $this->getNonExistingValidEmail(),
+            'email' => self::VALID_EMAIL,
             'password' => self::VALID_PASSWORD,
             'role_id' => '-1'
-        ];
-        $headers = [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
-            'CONTENT_TYPE' => 'application/json'
-        ];
-        $this->post('/api/users/store', $data, [], $headers);
+        ], $this->getAdminAuthClient());
 
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public function testAdminStoreIfInvalidName()
     {
-        $this->loginAsAdmin();
-        $response = $this->getArrayResponse();
-        $token = $response['token'];
-        $data = [
-            'name' => 'A',
-            'email' => $this->getNonExistingValidEmail(),
+        $this->post('/api/users/store', [
+            'name' => self::SHORT_NAME,
+            'email' => self::VALID_EMAIL,
             'password' => self::VALID_PASSWORD,
             'role_id' => '2'
-        ];
-        $headers = [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
-            'CONTENT_TYPE' => 'application/json'
-        ];
-        $this->post('/api/users/store', $data, [], $headers);
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        ], $this->getAdminAuthClient());
+
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public function testAdminStoreIfExistingEmail()
     {
-        $this->loginAsAdmin();
-        $response = $this->getArrayResponse();
-        $token = $response['token'];
-        $data = [
+        $this->post('/api/users/store', [
             'name' => self::VALID_NAME,
             'email' => self::EXISTING_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
             'role_id' => '2'
-        ];
-        $headers = [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
-            'CONTENT_TYPE' => 'application/json'
-        ];
-        $this->post('/api/users/store', $data, [], $headers);
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        ], $this->getAdminAuthClient());
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public function testAdminStoreIfWeakPassword()
     {
-        $this->loginAsAdmin();
-        $response = $this->getArrayResponse();
-        $token = $response['token'];
-        $data = [
+        $this->post('/api/users/store', [
             'name' => self::VALID_NAME,
-            'email' => $this->getNonExistingValidEmail(),
+            'email' => self::VALID_EMAIL,
             'password' => 'password',
             'role_id' => '2'
-        ];
-        $headers = [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
-            'CONTENT_TYPE' => 'application/json'
-        ];
-        $this->post('/api/users/store', $data, [], $headers);
-        $this->assertResponseStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        ], $this->getAdminAuthClient());
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public function testAdminShow()
     {
-        $this->loginAsAdmin();
-        $response = $this->getArrayResponse();
-        $token = $response['token'];
-        $this->get('/api/users/show/' . self::EXISTING_USER_ID, [], [], [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
-            'CONTENT_TYPE' => 'application/json',
-        ]);
-        $this->assertResponseOk();
-        $response = $this->getArrayResponse();
-        $expectedResponse = [
+        $this->get('/api/users/show/' . self::EXISTING_USER_ID, $this->getAdminAuthClient());
+        $this->assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::EXISTING_USER_NAME,
             'email' => self::EXISTING_USER_EMAIL,
             'isAdmin' => false,
-        ];
-        $this->assertEquals($expectedResponse, $response);
+        ]);
     }
 
     public function testAdminUpdate(): void
     {
-        $data = $this->loginAsAdminAndCreateUser();
-        $newData = [
-            'name' => 'Some new name',
-            'email' => $this->getNonExistingValidEmail(),
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
+            'name' => self::NEW_USER_NAME,
+            'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
             'role_id' => '1'
-        ];
-        $this->put('/api/users/update/' . $data['id'], $newData, [], [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $data['token'],
-            'CONTENT_TYPE' => 'application/json',
-        ]);
-        $response = $this->getArrayResponse();
-        $this->assertResponseOk();
-        $expectedResponse = [
-            'id' => $data['id'],
-            'name' => $newData['name'],
-            'email' => $newData['email'],
+        ], $this->getAdminAuthClient());
+
+        $this->assertResponse([
+            'id' => self::EXISTING_USER_ID,
+            'name' => self::NEW_USER_NAME,
+            'email' => self::NEW_USER_EMAIL,
             'isAdmin' => true
-        ];
-        $this->assertEquals($response, $expectedResponse);
+        ]);
     }
 
     public function testAdminDelete()
     {
-        $data = $this->loginAsAdminAndCreateUser();
-        $this->get('/api/users/show/' . $data['id'], [], [], [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $data['token'],
-            'CONTENT_TYPE' => 'application/json',
-        ]);
+        $this->delete('/api/users/delete/' . self::EXISTING_USER_ID, $this->getAdminAuthClient());
         $this->assertResponseOk();
-        $this->delete('/api/users/delete/' . $data['id'], [], [], [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $data['token'],
-            'CONTENT_TYPE' => 'application/json',
-        ]);
-        $this->assertResponseOk();
-        $this->get('/api/users/show/' . $data['id'], [], [], [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $data['token'],
-            'CONTENT_TYPE' => 'application/json',
-        ]);
-        $this->assertResponseStatus(Response::HTTP_NOT_FOUND);
-    }
-
-    /**
-     * @return array
-     */
-    private function loginAsAdminAndCreateUser(): array
-    {
-        $this->loginAsAdmin();
-        $response = $this->getArrayResponse();
-        $token = $response['token'];
-        $data = [
-            'name' => self::VALID_NAME,
-            'email' => $this->getNonExistingValidEmail(),
-            'password' => self::VALID_PASSWORD,
-            'role_id' => '2'
-        ];
-        $headers = [
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
-            'CONTENT_TYPE' => 'application/json'
-        ];
-        $this->post('/api/users/store', $data, [], $headers);
-
-        return array_merge($this->getArrayResponse(), ['token' => $token]);
     }
 }
 
