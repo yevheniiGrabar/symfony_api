@@ -97,7 +97,6 @@ class AuthController extends AbstractController
         RolesManager $rolesManager
     ): JsonResponse
     {
-
         $request = $this->userRequestParser->parseRequest($request);
 
         /** @var User|null $user */
@@ -183,4 +182,3 @@ class AuthController extends AbstractController
         return new JsonResponse(['token' => $token, 'refresh_token' => $refreshToken]);
     }
 }
-
