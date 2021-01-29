@@ -14,6 +14,7 @@ class UsersApiTests extends FeatureTestCase
         $this->assertResponse([
             'errors' => 'Access denied'
         ]);
+        $this->assertArrayHasKey('errors', $this->response, self::ACCESS_DENIED_MESSAGE);
     }
 
     public function testShow(): void
@@ -30,89 +31,84 @@ class UsersApiTests extends FeatureTestCase
 
     public function testUpdate(): void
     {
-        $newData = [
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
             'name' => self::NEW_USER_NAME,
             'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
-        ];
-
-        $this->put('/api/users/update/' . self::EXISTING_USER_ID, $newData, $this->getUserAuthClient());
-
-        $this->assertResponseOk();
+        ], $this->getUserAuthClient());
         $this->assertResponse([
             'id' => self::EXISTING_USER_ID,
-            'name' => $newData['name'],
-            'email' => $newData['email'],
+            'name' => self::NEW_USER_NAME,
+            'email' => self::NEW_USER_EMAIL,
             'isAdmin' => false,
         ]);
     }
 
     public function testUpdateWithExistingEmail()
     {
-        $newData = [
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
             'name' => self::NEW_USER_NAME,
             'email' => self::EXISTING_ADMIN_EMAIL,
             'password' => self::VALID_PASSWORD,
-        ];
-        $this->put('/api/users/update/' . self::EXISTING_USER_ID, $newData, $this->getUserAuthClient());
-
+        ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertArrayHasKey('errors', $this->response, self::EMAIL_ALREADY_IN_USE_MESSAGE);
     }
 
     public function testUpdateWithWeakPassword()
     {
-        $newData = [
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
             'name' => self::NEW_USER_NAME,
             'email' => self::NEW_USER_EMAIL,
             'password' => self::WEAK_PASSWORD,
-        ];
-        $this->put('/api/users/update/' . self::EXISTING_USER_ID, $newData, $this->getUserAuthClient());
+        ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertArrayHasKey('errors', $this->response, self::PASSWORD_IS_TOO_SHORT_MESSAGE);
     }
 
     public function testUpdateWithShortName()
     {
-        $newData = [
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
             'name' => self::SHORT_NAME,
             'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
-        ];
-        $this->put('/api/users/update/' . self::EXISTING_USER_ID, $newData, $this->getUserAuthClient());
+        ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertArrayHasKey('errors', $this->response, self::NAME_IS_TOO_SHORT_MESSAGE);
     }
 
     public function testUpdateWithoutName()
     {
-        $newData = [
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
             'name' => '',
             'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
-        ];
-        $this->put('/api/users/update/' . self::EXISTING_USER_ID, $newData, $this->getUserAuthClient());
+        ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertArrayHasKey('errors', $this->response, self::NAME_IS_REQUIRED_MESSAGE);
     }
 
 
     public function testUpdateWithoutEmail()
     {
-        $newData = [
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
             'name' => self::NEW_USER_NAME,
             'email' => '',
             'password' => self::VALID_PASSWORD,
-        ];
-        $this->put('/api/users/update/' . self::EXISTING_USER_ID, $newData, $this->getUserAuthClient());
+        ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertArrayHasKey('errors', $this->response, self::EMAIL_IS_REQUIRED_MESSAGE);
     }
 
     public function testUpdateWithoutPassword()
     {
-        $newData = [
+        $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
             'name' => self::NEW_USER_NAME,
             'email' => self::NEW_USER_EMAIL,
             'password' => '',
-        ];
-        $this->put('/api/users/update/' . self::EXISTING_USER_ID, $newData, $this->getUserAuthClient());
+        ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertArrayHasKey('errors', $this->response, self::PASSWORD_IS_REQUIRED_MESSAGE);
     }
 
 
@@ -127,6 +123,7 @@ class UsersApiTests extends FeatureTestCase
         $this->getUserAuthClient();
         $this->get('/api/users/show/' . self::EXISTING_ADMIN_ID, $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_FORBIDDEN);
+        $this->assertArrayHasKey('errors', $this->response, self::ACCESS_DENIED_MESSAGE);
 
     }
 
@@ -136,6 +133,7 @@ class UsersApiTests extends FeatureTestCase
 
         $this->put('/api/users/update/' . self::EXISTING_ADMIN_ID, [], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_FORBIDDEN);
+        $this->assertArrayHasKey('errors', $this->response, self::ACCESS_DENIED_MESSAGE);
     }
 
     public function testDeleteAnotherUser()
@@ -143,6 +141,7 @@ class UsersApiTests extends FeatureTestCase
         $this->getUserAuthClient();
         $this->delete('/api/users/delete/' . self::EXISTING_ADMIN_ID,);
         $this->assertStatusCode(Response::HTTP_FORBIDDEN);
+        $this->assertArrayHasKey('errors', $this->response, self::ACCESS_DENIED_MESSAGE);
     }
 
     public function testUpdateIfAdminRole()

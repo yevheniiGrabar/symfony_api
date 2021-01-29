@@ -37,6 +37,7 @@ class FeatureTestCase extends WebTestCase
     public const PASSWORD_IS_INVALID_MESSAGE = 'Invalid password';
     public const EXPIRE_REFRESH_TOKEN_MESSAGE = 'Expired refresh token';
     public const USER_NOT_FOUND_MESSAGE = 'User not found';
+    public const ACCESS_DENIED_MESSAGE = 'Access denied';
 
     /** @var KernelBrowser|null */
     protected static ?KernelBrowser $anonClient = null;
