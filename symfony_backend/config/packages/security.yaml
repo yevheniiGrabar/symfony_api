@@ -1,31 +1,37 @@
 security:
-    encoders:
-        App\Entity\User:
-            algorithm: bcrypt
-    providers:
-        app_user_provider:
-            lexik_jwt:
-                class: App\Entity\User
+  encoders:
+    App\Entity\User:
+      algorithm: bcrypt
+  providers:
+    app_user_provider:
+      lexik_jwt:
+        class: App\Entity\User
 
-    firewalls:
-        login:
-            pattern: ^/api/login
-            stateless: true
-            anonymous: true
+  firewalls:
+    login:
+      pattern: ^/api/login
+      stateless: true
+      anonymous: true
 
-        register:
-            pattern: ^/api/register
-            stateless: true
-            anonymous: true
+    register:
+      pattern: ^/api/register
+      stateless: true
+      anonymous: true
 
-        api:
-            pattern: ^/api
-            stateless: true
-            guard:
-                authenticators:
-                    - lexik_jwt_authentication.jwt_token_authenticator
+    refresh:
+      pattern: ^/api/token/refresh
+      stateless: true
+      anonymous: true
 
-    access_control:
-        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+    api:
+      pattern: ^/api
+      stateless: true
+      guard:
+        authenticators:
+          - lexik_jwt_authentication.jwt_token_authenticator
+
+  access_control:
+    - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }

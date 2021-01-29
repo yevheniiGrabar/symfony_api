@@ -183,3 +183,4 @@ class UserRequestParserTest extends TestCase
         return $rolesManager;
     }
 }
+

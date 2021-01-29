@@ -45,7 +45,7 @@ class UserRequestValidatorTest extends TestCase
     {
         $request = new UserRequest();
         $request->name = '';
-        $request->email =  self::VALID_EMAIL;
+        $request->email = self::VALID_EMAIL;
         $request->password = self::VALID_PASSWORD;
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(2, $violations);
@@ -172,3 +172,4 @@ class UserRequestValidatorTest extends TestCase
         return $str;
     }
 }
+

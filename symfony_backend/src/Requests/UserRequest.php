@@ -18,3 +18,4 @@ class UserRequest
     /** @var Role|null */
     public ?Role $role = null;
 }
+

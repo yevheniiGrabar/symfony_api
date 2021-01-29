@@ -2,13 +2,16 @@
 
 namespace App\Controller;
 
+use Carbon\Carbon;
 use App\Entity\User;
+use App\Entity\RefreshToken;
 use Doctrine\ORM\ORMException;
 use App\Services\RolesManager;
 use App\Repository\UserRepository;
 use App\Services\UserRequestParser;
 use App\Services\UserRequestValidator;
 use Doctrine\ORM\OptimisticLockException;
+use App\Repository\RefreshTokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -30,10 +33,18 @@ class AuthController extends AbstractController
     /** @var UserRequestParser */
     private UserRequestParser $userRequestParser;
 
-    public function __construct(UserRepository $userRepository, UserRequestParser $userRequestParser)
+    /** @var RefreshTokenRepository */
+    private RefreshTokenRepository $refreshTokenRepository;
+
+    public function __construct(
+        UserRepository $userRepository,
+        UserRequestParser $userRequestParser,
+        RefreshTokenRepository $refreshTokenRepository
+    )
     {
         $this->userRepository = $userRepository;
         $this->userRequestParser = $userRequestParser;
+        $this->refreshTokenRepository = $refreshTokenRepository;
     }
 
     /**
@@ -103,10 +114,18 @@ class AuthController extends AbstractController
         $token = $tokenManager->createFromPayload($user, $user->toArray());
         $authHandler->handleAuthenticationSuccess($user, $token);
 
-        return new JsonResponse(['token' => $token]);
+        /** @var RefreshToken|null $userToken */
+        $userToken = $this->refreshTokenRepository->findOneBy(['username' => $request->email], ['id' => 'DESC']);
+
+        if (!$userToken) {
+            return new JsonResponse(['errors' => 'Refresh Token not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse(['token' => $token, 'refresh_token' => $userToken->refresh_token]);
     }
 
     /**
+     *
      * @Route("/current", name="current", methods={"GET"})
      * @param TokenStorageInterface $storage
      * @return JsonResponse
@@ -117,5 +136,49 @@ class AuthController extends AbstractController
         $user = $storage->getToken()->getUser();
 
         return new JsonResponse($user->toArray());
+    }
+
+    /**
+     * @Route("/token/refresh", name="refresh_token", methods={"POST"})
+     * @param Request $request
+     * @param JWTTokenManagerInterface $tokenManager
+     * @param AuthenticationSuccessHandler $authHandler
+     * @param RolesManager $rolesManager
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function refreshUserAction
+    (
+        Request $request,
+        JWTTokenManagerInterface $tokenManager,
+        AuthenticationSuccessHandler $authHandler,
+        RolesManager $rolesManager
+    ): JsonResponse
+    {
+        $refreshToken = (string)$request->get('refresh_token', '');
+
+        /** @var RefreshToken|null $refreshTokenEntity */
+        $refreshTokenEntity = $this->refreshTokenRepository->findOneBy(['refresh_token' => $refreshToken]);
+
+        if (!$refreshTokenEntity) {
+            return new JsonResponse(['errors' => 'Refresh Token not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $currentDate = Carbon::now();
+        $refreshTokenDate = Carbon::parse($refreshTokenEntity->getValid());
+
+        if ($currentDate > $refreshTokenDate) {
+            return new JsonResponse(['errors' => 'Expired refresh token'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        /** @var User $user */
+        $user = $this->userRepository->findOneBy(['email' => $refreshTokenEntity->getUsername()]);
+
+        $user->setIsAdmin($rolesManager->isAdmin($user));
+        $token = $tokenManager->createFromPayload($user, $user->toArray());
+        $authHandler->handleAuthenticationSuccess($user, $token);
+
+        return new JsonResponse(['token' => $token, 'refresh_token' => $refreshToken]);
     }
 }

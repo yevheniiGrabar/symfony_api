@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class ParseRequestMiddleware implements EventSubscriberInterface
 {
     /** @param ControllerEvent $event */
-    public function onEveryKernelController(ControllerEvent $event): void
+    public function onKernelController(ControllerEvent $event): void
     {
         /** @var AbstractController|AbstractController[] $controller */
         $controller = $event->getController();
@@ -32,7 +32,8 @@ class ParseRequestMiddleware implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::CONTROLLER => 'onEveryKernelController',
+            KernelEvents::CONTROLLER => 'onKernelController',
         ];
     }
 }
+

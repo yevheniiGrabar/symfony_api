@@ -155,3 +155,4 @@ class RolesManagerTest extends TestCase
         return $roleRepository;
     }
 }
+
