@@ -34,7 +34,7 @@ class AdminsApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
             'role_id' => '-1'
         ], $this->getAdminAuthClient());
-
+        $this->assertArrayHasKey('errors',$this->response,'Role is required');
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
@@ -46,7 +46,7 @@ class AdminsApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
             'role_id' => '2'
         ], $this->getAdminAuthClient());
-
+        $this->assertArrayHasKey('errors',$this->response,'Name is too short');
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
@@ -58,6 +58,7 @@ class AdminsApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
             'role_id' => '2'
         ], $this->getAdminAuthClient());
+        $this->assertArrayHasKey('errors', $this->response,'This email is already in use');
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
@@ -69,6 +70,7 @@ class AdminsApiTests extends FeatureTestCase
             'password' => 'password',
             'role_id' => '2'
         ], $this->getAdminAuthClient());
+        $this->assertArrayHasKey('errors',$this->response,'This password was compromised');
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 

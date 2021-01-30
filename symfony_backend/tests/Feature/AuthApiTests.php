@@ -3,12 +3,8 @@
 namespace App\Tests\Feature;
 
 use App\Tests\TestCases\FeatureTestCase;
-use DAMA\DoctrineTestBundle\Behat\BehatListener;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @todo: Assert response messages
- */
 class AuthApiTests extends FeatureTestCase
 {
     public function testRegister()
@@ -36,7 +32,7 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, self::EMAIL_ALREADY_IN_USE_MESSAGE);
+        $this->assertArrayHasKey('errors', $this->response, 'Email already in use');
     }
 
     public function testRegisterWithWeakPassword()
@@ -48,7 +44,7 @@ class AuthApiTests extends FeatureTestCase
             'role_id' => self::ROLE_ID
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, self::PASSWORD_IS_TOO_SHORT_MESSAGE);
+        $this->assertArrayHasKey('errors', $this->response, 'Password is too short');
     }
 
     public function testRegisterWithoutName()
@@ -59,7 +55,7 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, self::NAME_IS_REQUIRED_MESSAGE);
+        $this->assertArrayHasKey('errors', $this->response, 'Name is required');
     }
 
     public function testRegisterWithoutShortName()
@@ -70,7 +66,7 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, self::NAME_IS_TOO_SHORT_MESSAGE);
+        $this->assertArrayHasKey('errors', $this->response, 'Name is too short');
     }
 
     public function testRegisterWithoutEmail()
@@ -81,7 +77,7 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, self::EMAIL_IS_REQUIRED_MESSAGE);
+        $this->assertArrayHasKey('errors', $this->response, 'Email is required');
     }
 
     public function testRegisterWithoutPassword()
@@ -92,7 +88,7 @@ class AuthApiTests extends FeatureTestCase
             'password' => '',
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, self::PASSWORD_IS_REQUIRED_MESSAGE);
+        $this->assertArrayHasKey('errors', $this->response,'Password is required');
     }
 
     public function testLogin()
@@ -145,7 +141,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertResponse([
             'errors' => 'Expired refresh token'
         ]);
-        $this->assertArrayHasKey('errors', $this->response, self::EXPIRE_REFRESH_TOKEN_MESSAGE);
+        $this->assertArrayHasKey('errors', $this->response,'Expired refresh token');
     }
 
     public function testLoginWithIncorrectEmail()
@@ -164,7 +160,7 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
         ]);
         $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
-        $this->assertArrayHasKey('errors', $this->response, self::PASSWORD_IS_INVALID_MESSAGE);
+        $this->assertArrayHasKey('errors', $this->response, 'Password in invalid');
     }
 
     public function testLoginWithoutPassword()
@@ -174,7 +170,7 @@ class AuthApiTests extends FeatureTestCase
             'password' => '',
         ]);
         $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
-        $this->assertArrayHasKey('errors', $this->response, self::PASSWORD_IS_INVALID_MESSAGE);
+        $this->assertArrayHasKey('errors', $this->response,'Password is invalid');
     }
 
     public function testLoginWithoutEmail()
