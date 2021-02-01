@@ -18,6 +18,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertArrayHasKey('id', $this->response);
         $this->assertGreaterThan(0, $this->response);
         unset($this->response['id']);
+        $this->assertResponseOk();
         $this->assertResponse([
             'name' => self::NEW_USER_NAME,
             'email' => self::NEW_USER_EMAIL,
@@ -35,7 +36,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::THIS_EMAIL_IS_ALREADY_IN_USE_MESSAGE, $this->response['errors']
+            UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE, $this->response['errors']
         );
     }
 
@@ -116,6 +117,7 @@ class AuthApiTests extends FeatureTestCase
             'email' => self::EXISTING_USER_EMAIL,
             'password' => self::EXISTING_USER_PASSWORD,
         ]);
+        $this->assertResponseOk();
         $this->assertArrayHasKey('token', $this->response);
         $this->assertArrayHasKey('refresh_token', $this->response);
         $this->assertGreaterThan(0, strlen($this->response['token']));
@@ -142,7 +144,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertGreaterThan(0, strlen($this->response['refresh_token']));
         self::$anonClient->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $this->response['token']));
         $this->get('/api/current');
-
+        $this->assertResponseOk();
         $this->assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::EXISTING_USER_NAME,
@@ -158,9 +160,6 @@ class AuthApiTests extends FeatureTestCase
             'refresh_token' => self::EXPIRED_TOKEN
         ]);
         $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
-        $this->assertResponse([
-            'errors' => 'Expired refresh token'
-        ]);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
             UserRequestValidator::EXPIRED_REFRESH_TOKEN_MESSAGE, $this->response['errors']
@@ -217,6 +216,7 @@ class AuthApiTests extends FeatureTestCase
             'email' => self::EXISTING_USER_EMAIL,
             'password' => self::EXISTING_USER_PASSWORD,
         ]);
+        $this->assertResponseOk();
         $refreshToken = $this->response['refresh_token'];
         self::$anonClient->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $this->response['token']));
         $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
@@ -224,6 +224,7 @@ class AuthApiTests extends FeatureTestCase
             'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
         ]);
+        $this->assertResponseOk();
         $this->assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::NEW_USER_NAME,
@@ -234,6 +235,7 @@ class AuthApiTests extends FeatureTestCase
         $this->post('/api/token/refresh', [
             'refresh_token' => $refreshToken
         ]);
+        $this->assertResponseOk();
         self::$anonClient->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $this->response['token']));
         $this->get('/api/users/show/' . self::EXISTING_USER_ID);
         $this->assertResponse([
