@@ -2,6 +2,7 @@
 
 namespace App\Tests\TestCases;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,6 +29,7 @@ class FeatureTestCase extends WebTestCase
     protected const NEW_USER_EMAIL = 'newUserEmail@email.com';
     protected const ROLE_ID = 2;
 
+
     /** @var KernelBrowser|null */
     protected static ?KernelBrowser $anonClient = null;
 
@@ -52,7 +54,7 @@ class FeatureTestCase extends WebTestCase
             return self::$userAuthClient;
         }
 
-        self::$userAuthClient = self::getAnonClient();
+        self::$userAuthClient = self::getAnonymousClient();
         self::$userAuthClient->request('POST', '/api/login', [], [], [], json_encode([
                 'email' => self::EXISTING_USER_EMAIL,
                 'password' => self::EXISTING_USER_PASSWORD,
@@ -74,7 +76,7 @@ class FeatureTestCase extends WebTestCase
             return self::$adminAuthClient;
         }
 
-        self::$adminAuthClient = self::getAnonClient();
+        self::$adminAuthClient = self::getAnonymousClient();
         self::$adminAuthClient->request('POST', '/api/login', [], [], [], json_encode([
                 'email' => self::EXISTING_ADMIN_EMAIL,
                 'password' => self::EXISTING_ADMIN_PASSWORD,
@@ -90,7 +92,7 @@ class FeatureTestCase extends WebTestCase
     /**
      * @return KernelBrowser
      */
-    protected static function getAnonClient(): KernelBrowser
+    protected static function getAnonymousClient(): KernelBrowser
     {
         if (self::$anonClient instanceof KernelBrowser) {
             return self::$anonClient;
@@ -108,7 +110,7 @@ class FeatureTestCase extends WebTestCase
     protected function get(string $uri, ?KernelBrowser $client = null): void
     {
         if (is_null($client)) {
-            $client = self::getAnonClient();
+            $client = self::getAnonymousClient();
         }
 
         $client->request('GET', $uri);
@@ -123,7 +125,7 @@ class FeatureTestCase extends WebTestCase
     protected function post(string $uri, array $params, ?KernelBrowser $client = null): void
     {
         if (is_null($client)) {
-            $client = self::getAnonClient();
+            $client = self::getAnonymousClient();
         }
 
         $content = json_encode($params);
@@ -139,7 +141,7 @@ class FeatureTestCase extends WebTestCase
     protected function put(string $uri, array $params, ?KernelBrowser $client = null): void
     {
         if (is_null($client)) {
-            $client = self::getAnonClient();
+            $client = self::getAnonymousClient();
         }
 
         $content = json_encode($params);
@@ -154,7 +156,7 @@ class FeatureTestCase extends WebTestCase
     protected function delete(string $uri, ?KernelBrowser $client = null): void
     {
         if (is_null($client)) {
-            $client = self::getAnonClient();
+            $client = self::getAnonymousClient();
         }
 
         $client->request('DELETE', $uri);

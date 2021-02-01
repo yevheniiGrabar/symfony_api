@@ -2,6 +2,7 @@
 
 namespace App\Tests\Feature;
 
+use App\Services\UserRequestValidator;
 use App\Tests\TestCases\FeatureTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,7 +33,10 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, 'Email already in use');
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(
+            UserRequestValidator::THIS_EMAIL_IS_ALREADY_IN_USE_MESSAGE, $this->response['errors']
+        );
     }
 
     public function testRegisterWithWeakPassword()
@@ -44,7 +48,10 @@ class AuthApiTests extends FeatureTestCase
             'role_id' => self::ROLE_ID
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, 'Password is too short');
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(
+            UserRequestValidator::PASSWORD_IS_TOO_SHORT_MESSAGE, $this->response['errors']
+        );
     }
 
     public function testRegisterWithoutName()
@@ -55,7 +62,10 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, 'Name is required');
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(
+            UserRequestValidator::NAME_IS_REQUIRE_MESSAGE, $this->response['errors']
+        );
     }
 
     public function testRegisterWithoutShortName()
@@ -66,7 +76,10 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, 'Name is too short');
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(
+            UserRequestValidator::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']
+        );
     }
 
     public function testRegisterWithoutEmail()
@@ -77,7 +90,10 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response, 'Email is required');
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(
+            UserRequestValidator::EMAIL_IS_REQUIRED_MESSAGE, $this->response['errors']
+        );
     }
 
     public function testRegisterWithoutPassword()
@@ -88,7 +104,10 @@ class AuthApiTests extends FeatureTestCase
             'password' => '',
         ]);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response,'Password is required');
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(
+            UserRequestValidator::PASSWORD_IS_REQUIRE_MESSAGE, $this->response['errors']
+        );
     }
 
     public function testLogin()
@@ -123,6 +142,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertGreaterThan(0, strlen($this->response['refresh_token']));
         self::$anonClient->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $this->response['token']));
         $this->get('/api/current');
+
         $this->assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::EXISTING_USER_NAME,
@@ -141,7 +161,10 @@ class AuthApiTests extends FeatureTestCase
         $this->assertResponse([
             'errors' => 'Expired refresh token'
         ]);
-        $this->assertArrayHasKey('errors', $this->response,'Expired refresh token');
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(
+            UserRequestValidator::EXPIRED_REFRESH_TOKEN_MESSAGE, $this->response['errors']
+        );
     }
 
     public function testLoginWithIncorrectEmail()
@@ -160,7 +183,10 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
         ]);
         $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
-        $this->assertArrayHasKey('errors', $this->response, 'Password in invalid');
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(
+            UserRequestValidator::PASSWORD_IS_INVALID_MESSAGE, $this->response['errors']
+        );
     }
 
     public function testLoginWithoutPassword()
@@ -170,7 +196,10 @@ class AuthApiTests extends FeatureTestCase
             'password' => '',
         ]);
         $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
-        $this->assertArrayHasKey('errors', $this->response,'Password is invalid');
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(
+            UserRequestValidator::PASSWORD_IS_INVALID_MESSAGE, $this->response['errors']
+        );
     }
 
     public function testLoginWithoutEmail()
