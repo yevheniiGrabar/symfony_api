@@ -2,8 +2,7 @@
 
 namespace App\Tests\TestCases;
 
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,213 +14,190 @@ class FeatureTestCase extends WebTestCase
     protected const EXISTING_ADMIN_NAME = 'admin';
     protected const EXISTING_ADMIN_EMAIL = 'admin@email.com';
     protected const EXISTING_ADMIN_PASSWORD = 'password';
-
     protected const EXISTING_USER_ID = 2;
     protected const EXISTING_USER_NAME = 'user';
     protected const EXISTING_USER_EMAIL = 'user@email.com';
     protected const EXISTING_USER_PASSWORD = 'password';
-    protected const WEAK_PASSWORD = '111';
+    protected const SHORT_NAME = 'S';
+    protected const WEAK_PASSWORD = '*1QwE';
     protected const VALID_PASSWORD = 'SoMeSeCuRePaSsWoRd54535251!!!';
     protected const VALID_NAME = 'SomeUsername';
+    protected const VALID_EMAIL = 'NewValideamail@email.com';
+    protected const INVALID_EMAIL = 'email.email.com';
     protected const EXPIRED_TOKEN = '18718e71b1c1411b395b94979424c7158a6e0c39fd18d9f3d94e76c5938c58749977a4f2d67d7320fe7874f2be2a09c36afc0c6b4271a873a0aaa2f5de92e24c';
+    protected const NEW_USER_NAME = 'newName';
+    protected const NEW_USER_EMAIL = 'newUserEmail@email.com';
+    protected const ROLE_ID = 2;
+
 
     /** @var KernelBrowser|null */
-    private static ?KernelBrowser $client = null;
+    protected static ?KernelBrowser $anonClient = null;
+
+    /** @var KernelBrowser|null */
+    protected static ?KernelBrowser $adminAuthClient = null;
+
+    /** @var KernelBrowser|null */
+    protected static ?KernelBrowser $userAuthClient = null;
+
+    /** @var int */
+    protected int $statusCode = 0;
+
+    /** @var array */
+    protected array $response = [];
 
     /**
      * @return KernelBrowser
      */
-    protected static function getClient(): KernelBrowser
+    protected function getUserAuthClient(): KernelBrowser
     {
-        if (self::$client instanceof KernelBrowser) {
-            return self::$client;
+        if (self::$userAuthClient instanceof KernelBrowser) {
+            return self::$userAuthClient;
         }
 
-        self::$client = static::createClient();
+        self::$userAuthClient = self::getAnonymousClient();
+        self::$userAuthClient->request('POST', '/api/login', [], [], [], json_encode([
+                'email' => self::EXISTING_USER_EMAIL,
+                'password' => self::EXISTING_USER_PASSWORD,
+            ])
+        );
+        $data = json_decode(self::$userAuthClient->getResponse()->getContent(), true);
 
-        return self::$client;
-    }
+        self::$userAuthClient->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $data['token']));
 
-    protected function loginAsAdmin(): void
-    {
-        $this->loginAsUser(self::EXISTING_ADMIN_EMAIL, self::EXISTING_ADMIN_PASSWORD);
+        return self::$userAuthClient;
     }
 
     /**
-     * @param string $email
-     * @param string $password
+     * @return KernelBrowser
      */
-    protected function loginAsUser(
-        string $email = self::EXISTING_USER_EMAIL,
-        string $password = self::EXISTING_USER_PASSWORD
-    ): void
+    protected function getAdminAuthClient(): KernelBrowser
     {
-        $this->post('/api/login', [
-            'email' => $email,
-            'password' => $password
-        ]);
+        if (self::$adminAuthClient instanceof KernelBrowser) {
+            return self::$adminAuthClient;
+        }
+
+        self::$adminAuthClient = self::getAnonymousClient();
+        self::$adminAuthClient->request('POST', '/api/login', [], [], [], json_encode([
+                'email' => self::EXISTING_ADMIN_EMAIL,
+                'password' => self::EXISTING_ADMIN_PASSWORD,
+            ])
+        );
+        $data = json_decode(self::$adminAuthClient->getResponse()->getContent(), true);
+
+        self::$adminAuthClient->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $data['token']));
+
+        return self::$adminAuthClient;
     }
 
     /**
-     * @param string $name
-     * @param string $email
-     * @param string $password
-     * @return string
+     * @return KernelBrowser
      */
-    protected function registerAsUser(
-        string $name = self::VALID_NAME,
-        string $email = '',
-        string $password = self::VALID_PASSWORD
-    ): string
+    protected static function getAnonymousClient(): KernelBrowser
     {
-        if ($email == '') {
-            $email = $this->getNonExistingValidEmail();
+        if (self::$anonClient instanceof KernelBrowser) {
+            return self::$anonClient;
         }
 
-        $this->post('/api/register', [
-            'name' => $name,
-            'email' => $email,
-            'password' => $password,
-        ]);
+        self::$anonClient = static::createClient();
 
-        return $email;
+        return self::$anonClient;
     }
 
     /**
-     * @return array
+     * @param string $uri
+     * @param KernelBrowser|null $client
      */
-    protected function getArrayResponse(): array
+    protected function get(string $uri, ?KernelBrowser $client = null): void
     {
-        $response = self::getClient()->getResponse();
-
-        if (!$response instanceof JsonResponse) {
-            return [];
+        if (is_null($client)) {
+            $client = self::getAnonymousClient();
         }
 
-        return json_decode($response->getContent(), true);
+        $client->request('GET', $uri);
+        $this->response($client);
     }
 
-    protected function assertResponseOk(): void
+    /**
+     * @param string $uri
+     * @param array $params
+     * @param KernelBrowser|null $client
+     */
+    protected function post(string $uri, array $params, ?KernelBrowser $client = null): void
     {
-        $this->assertResponseStatus(Response::HTTP_OK);
+        if (is_null($client)) {
+            $client = self::getAnonymousClient();
+        }
+
+        $content = json_encode($params);
+        $client->request('POST', $uri, [], [], [], $content);
+        $this->response($client);
+    }
+
+    /**
+     * @param string $uri
+     * @param array $params
+     * @param KernelBrowser|null $client
+     */
+    protected function put(string $uri, array $params, ?KernelBrowser $client = null): void
+    {
+        if (is_null($client)) {
+            $client = self::getAnonymousClient();
+        }
+
+        $content = json_encode($params);
+        $client->request('PUT', $uri, [], [], [], $content);
+        $this->response($client);
+    }
+
+    /**
+     * @param string $uri
+     * @param KernelBrowser|null $client
+     */
+    protected function delete(string $uri, ?KernelBrowser $client = null): void
+    {
+        if (is_null($client)) {
+            $client = self::getAnonymousClient();
+        }
+
+        $client->request('DELETE', $uri);
+        $this->response($client);
+    }
+
+    /**
+     * @param array $expectedResponse
+     */
+    protected function assertResponse(array $expectedResponse): void
+    {
+        $this->assertEquals($expectedResponse, $this->response);
     }
 
     /**
      * @param int $code
      */
-    protected function assertResponseStatus(int $code): void
+    protected function assertStatusCode(int $code): void
     {
-        $this->assertEquals($code, self::getClient()->getResponse()->getStatusCode());
+        $this->assertEquals($code, $this->statusCode);
+    }
+
+    protected function assertResponseOk(): void
+    {
+        $this->assertEquals(Response::HTTP_OK, $this->statusCode);
     }
 
     /**
-     * @param string $uri
-     * @param array $parameters
-     * @param array $files
-     * @param array $server
-     * @param string|null $content
-     * @param bool $changeHistory
-     * @return Crawler|null
+     * @param KernelBrowser $client
      */
-    protected function post(
-        string $uri,
-        array $parameters = [],
-        array $files = [],
-        array $server = [],
-        string $content = null,
-        bool $changeHistory = true
-    ): ?Crawler
+    private function response(KernelBrowser $client): void
     {
-        return self::getClient()->request('POST', $uri, $parameters, $files, $server, $content, $changeHistory);
-    }
+        $this->response = [];
+        $response = $client->getResponse();
+        $this->statusCode = $response->getStatusCode();
 
-    /**
-     * @param string $uri
-     * @param array $parameters
-     * @param array $files
-     * @param array $server
-     * @param string|null $content
-     * @param bool $changeHistory
-     * @return Crawler|null
-     */
-    protected function get(
-        string $uri,
-        array $parameters = [],
-        array $files = [],
-        array $server = [],
-        string $content = null,
-        bool $changeHistory = true
-    ): ?Crawler
-    {
-        return self::getClient()->request('GET', $uri, $parameters, $files, $server, $content, $changeHistory);
-    }
+        if (!$response instanceof JsonResponse) {
+            $this->response = [];
+        }
 
-    /**
-     * @param string $uri
-     * @param array $parameters
-     * @param array $files
-     * @param array $server
-     * @param string|null $content
-     * @param bool $changeHistory
-     * @return Crawler|null
-     */
-    protected function put(
-        string $uri,
-        array $parameters = [],
-        array $files = [],
-        array $server = [],
-        string $content = null,
-        bool $changeHistory = true
-    ): ?Crawler
-    {
-        return self::getClient()->request('PUT', $uri, $parameters, $files, $server, $content, $changeHistory);
-    }
-
-    /**
-     * @param string $uri
-     * @param array $parameters
-     * @param array $files
-     * @param array $server
-     * @param string|null $content
-     * @param bool $changeHistory
-     * @return Crawler|null
-     */
-    protected function delete(
-        string $uri,
-        array $parameters = [],
-        array $files = [],
-        array $server = [],
-        string $content = null,
-        bool $changeHistory = true
-    ): ?Crawler
-    {
-        return self::getClient()->request('DELETE', $uri, $parameters, $files, $server, $content, $changeHistory);
-    }
-
-    /**
-     * @return string
-     */
-    protected function getNonExistingValidEmail(): string
-    {
-        return 'someEmail' . rand(0, 100) . microtime(true) . '@email.com';
-    }
-
-    /**
-     * @return array
-     */
-    protected function registerAndLoginAsNewUser(): array
-    {
-        $email = $this->registerAsUser();
-        $response = $this->getArrayResponse();
-        $id = $response['id'];
-        $this->loginAsUser($email, self::VALID_PASSWORD);
-        $response = $this->getArrayResponse();
-        $token = $response['token'];
-
-        return [
-            'id' => $id,
-            'token' => $token
-        ];
+        $this->response = json_decode($response->getContent(), true);
     }
 }
 
