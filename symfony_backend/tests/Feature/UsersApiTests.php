@@ -12,10 +12,6 @@ class UsersApiTests extends FeatureTestCase
     {
         $this->post('/api/users/store', [], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_FORBIDDEN);
-        $this->assertResponse([
-            'errors' => 'Access denied'
-        ]);
-
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
             UserRequestValidator::ACCESS_DENIED_MESSAGE, $this->response['errors']
@@ -41,6 +37,7 @@ class UsersApiTests extends FeatureTestCase
             'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
         ], $this->getUserAuthClient());
+        $this->assertResponseOk();
         $this->assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::NEW_USER_NAME,

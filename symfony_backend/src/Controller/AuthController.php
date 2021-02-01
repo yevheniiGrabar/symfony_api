@@ -65,7 +65,7 @@ class AuthController extends AbstractController
         }
 
         if ($this->userRepository->findOneBy(['email' => $request->email])) {
-            return new JsonResponse(['errors' => 'This email is already in use'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(['errors' => UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $user = new User();
@@ -107,7 +107,7 @@ class AuthController extends AbstractController
         }
 
         if (!$encoder->isPasswordValid($user, $request->password)) {
-            return new JsonResponse(['errors' => 'Invalid password'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['errors' => UserRequestValidator::PASSWORD_IS_INVALID_MESSAGE], Response::HTTP_UNAUTHORIZED);
         }
 
         $user->setIsAdmin($rolesManager->isAdmin($user));
@@ -118,7 +118,7 @@ class AuthController extends AbstractController
         $userToken = $this->refreshTokenRepository->findOneBy(['username' => $request->email], ['id' => 'DESC']);
 
         if (!$userToken) {
-            return new JsonResponse(['errors' => 'Refresh Token not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['errors' => UserRequestValidator::REFRESH_TOKEN_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
         }
 
         return new JsonResponse(['token' => $token, 'refresh_token' => $userToken->refresh_token]);
@@ -162,14 +162,14 @@ class AuthController extends AbstractController
         $refreshTokenEntity = $this->refreshTokenRepository->findOneBy(['refresh_token' => $refreshToken]);
 
         if (!$refreshTokenEntity) {
-            return new JsonResponse(['errors' => 'Refresh Token not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['errors' => UserRequestValidator::REFRESH_TOKEN_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
         }
 
         $currentDate = Carbon::now();
         $refreshTokenDate = Carbon::parse($refreshTokenEntity->getValid());
 
         if ($currentDate > $refreshTokenDate) {
-            return new JsonResponse(['errors' => 'Expired refresh token'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['errors' => UserRequestValidator::EXPIRED_REFRESH_TOKEN_MESSAGE], Response::HTTP_UNAUTHORIZED);
         }
 
         /** @var User $user */

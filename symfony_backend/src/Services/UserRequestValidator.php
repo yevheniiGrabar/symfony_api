@@ -23,11 +23,12 @@ class UserRequestValidator
     public const EMAIL_IS_REQUIRED_MESSAGE = 'Email is required';
     public const EMAIL_IS_INVALID_MESSAGE = 'Email is invalid';
     public const ROLE_IS_REQUIRED_MESSAGE = 'Role is required';
-    public const THIS_EMAIL_IS_ALREADY_IN_USE_MESSAGE = 'This email is already in use';
     public const EMAIL_ALREADY_IN_USE_MESSAGE = 'This email already in use';
     public const ACCESS_DENIED_MESSAGE = 'Access denied';
     public const EXPIRED_REFRESH_TOKEN_MESSAGE = 'Expired refresh token';
     public const PASSWORD_IS_INVALID_MESSAGE = 'Invalid password';
+    public const REFRESH_TOKEN_NOT_FOUND_MESSAGE = 'Refresh token not found';
+    public const ENTITY_WAS_NOT_REMOVED_MESSAGE = 'Entity was not removed';
 
     /**
      * @param UserRequest $request
