@@ -39,7 +39,7 @@ class Post implements EntityInterface
     private DateTimeInterface $updated_at;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="post")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="Post")
      * @ORM\JoinColumn(nullable=false)
      */
     private User $user;
