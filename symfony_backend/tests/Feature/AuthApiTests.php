@@ -51,7 +51,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::PASSWORD_IS_TOO_SHORT_MESSAGE, $this->response['errors']
+            UserRequestValidator::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
         );
     }
 
@@ -107,7 +107,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::PASSWORD_IS_REQUIRE_MESSAGE, $this->response['errors']
+            UserRequestValidator::PASSWORD_IS_REQUIRED_MESSAGE, $this->response['errors']
         );
     }
 
@@ -124,9 +124,6 @@ class AuthApiTests extends FeatureTestCase
         $this->assertGreaterThan(0, strlen($this->response['refresh_token']));
     }
 
-    /**
-     * @todo: Check why does it return same access token after refresh
-     */
     public function testRefreshAction()
     {
         $this->post('/api/login', [
@@ -173,6 +170,8 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
         ]);
         $this->assertStatusCode(Response::HTTP_NOT_FOUND);
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(UserRequestValidator::USER_NOT_FOUND_MESSAGE, $this->response['errors']);
     }
 
     public function testLoginWithIncorrectPassword()
@@ -208,6 +207,8 @@ class AuthApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
         ]);
         $this->assertStatusCode(Response::HTTP_NOT_FOUND);
+        $this->assertArrayHasKey('errors', $this->response);
+        $this->assertStringContainsString(UserRequestValidator::USER_NOT_FOUND_MESSAGE, $this->response['errors']);
     }
 
     public function testRefreshActionAfterUpdateEmail()

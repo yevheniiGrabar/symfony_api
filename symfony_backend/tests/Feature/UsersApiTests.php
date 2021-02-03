@@ -70,7 +70,7 @@ class UsersApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::PASSWORD_IS_TOO_SHORT_MESSAGE, $this->response['errors']
+            UserRequestValidator::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
         );
     }
 
@@ -98,7 +98,6 @@ class UsersApiTests extends FeatureTestCase
         $this->assertStringContainsString(UserRequestValidator::NAME_IS_REQUIRE_MESSAGE, $this->response['errors']);
     }
 
-
     public function testUpdateWithoutEmail()
     {
         $this->put('/api/users/update/' . self::EXISTING_USER_ID, [
@@ -120,9 +119,8 @@ class UsersApiTests extends FeatureTestCase
         ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::PASSWORD_IS_REQUIRE_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(UserRequestValidator::PASSWORD_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
-
 
     public function testDelete(): void
     {

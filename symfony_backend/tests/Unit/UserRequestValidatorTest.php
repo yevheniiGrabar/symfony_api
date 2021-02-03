@@ -117,7 +117,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(2, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::PASSWORD_IS_REQUIRE_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(UserRequestValidator::PASSWORD_IS_REQUIRED_MESSAGE, $errorMessage);
     }
 
     public function testValidateWithShortPassword()
