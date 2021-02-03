@@ -16,7 +16,7 @@ class UserRequestValidator
     public const NAME_IS_REQUIRE_MESSAGE = 'Name is require';
     public const NAME_IS_TOO_SHORT_MESSAGE = 'Name is too short';
     public const NAME_IS_TOO_LONG_MESSAGE = 'Name is too long';
-    public const PASSWORD_IS_REQUIRE_MESSAGE = 'Password is require';
+    public const PASSWORD_IS_REQUIRED_MESSAGE = 'Password is required';
     public const PASSWORD_IS_TOO_SHORT_MESSAGE = 'Password is too short';
     public const PASSWORD_IS_TOO_LONG_MESSAGE = 'Password is too long';
     public const PASSWORD_IS_COMPROMISED_MESSAGE = 'This password was compromised';
@@ -29,6 +29,7 @@ class UserRequestValidator
     public const PASSWORD_IS_INVALID_MESSAGE = 'Invalid password';
     public const REFRESH_TOKEN_NOT_FOUND_MESSAGE = 'Refresh token not found';
     public const ENTITY_WAS_NOT_REMOVED_MESSAGE = 'Entity was not removed';
+    public const USER_NOT_FOUND_MESSAGE = 'User not found';
 
     /**
      * @param UserRequest $request
@@ -51,7 +52,7 @@ class UserRequestValidator
 
         $violations->addAll(
             $validator->validate($request->password, [
-                new NotBlank(['message' => self::PASSWORD_IS_REQUIRE_MESSAGE]),
+                new NotBlank(['message' => self::PASSWORD_IS_REQUIRED_MESSAGE]),
                 new Length([
                     'min' => 8,
                     'max' => 255,

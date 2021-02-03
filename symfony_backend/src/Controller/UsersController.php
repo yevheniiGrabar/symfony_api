@@ -66,7 +66,10 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         }
 
         if ($this->userRepository->findOneBy(['email' => $request->email])) {
-            return new JsonResponse(['errors' => UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(
+                ['errors' => UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
         }
 
         $user = new User();
@@ -130,7 +133,10 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
             $request->email != $user->getEmail()
             && $this->userRepository->findOneBy(['email' => $request->email])
         ) {
-            return new JsonResponse(['errors' => UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(
+                ['errors' => UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
         }
 
         $oldEmail = $user->getEmail();
@@ -166,7 +172,10 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         $removed = $this->userRepository->delete($user);
 
         if (!$removed) {
-            return new JsonResponse(['errors' => UserRequestValidator::ENTITY_WAS_NOT_REMOVED_MESSAGE], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(
+                ['errors' => UserRequestValidator::ENTITY_WAS_NOT_REMOVED_MESSAGE],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
 
         $this->refreshTokenRepository->removeAllByEmail($user->getEmail());
@@ -174,4 +183,3 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         return new JsonResponse(['success' => true]);
     }
 }
-

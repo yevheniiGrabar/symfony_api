@@ -19,7 +19,7 @@ class FeatureTestCase extends WebTestCase
     protected const EXISTING_USER_EMAIL = 'user@email.com';
     protected const EXISTING_USER_PASSWORD = 'password';
     protected const SHORT_NAME = 'S';
-    protected const WEAK_PASSWORD = '*1QwE';
+    protected const WEAK_PASSWORD = '1234567890';
     protected const VALID_PASSWORD = 'SoMeSeCuRePaSsWoRd54535251!!!';
     protected const VALID_NAME = 'SomeUsername';
     protected const VALID_EMAIL = 'NewValideamail@email.com';
