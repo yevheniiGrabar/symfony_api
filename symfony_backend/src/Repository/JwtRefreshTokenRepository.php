@@ -2,10 +2,10 @@
 
 namespace App\Repository;
 
-use App\Entity\RefreshToken;
+use App\Entity\JwtRefreshToken;
 use Doctrine\Persistence\ManagerRegistry;
 
-class RefreshTokenRepository extends AbstractRepository
+class JwtRefreshTokenRepository extends AbstractRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -17,7 +17,7 @@ class RefreshTokenRepository extends AbstractRepository
      */
     protected function getModel(): string
     {
-        return RefreshToken::class;
+        return JwtRefreshToken::class;
     }
 
     /**

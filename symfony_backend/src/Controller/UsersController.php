@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\RefreshTokenRepository;
+use App\Repository\JwtRefreshTokenRepository;
 use App\Services\RolesManager;
 use Doctrine\ORM\ORMException;
 use App\Repository\UserRepository;
@@ -31,24 +31,25 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
     /** @var UserRequestParser */
     private UserRequestParser $userRequestParser;
 
-    /** @var RefreshTokenRepository */
-    private RefreshTokenRepository $refreshTokenRepository;
+    /** @var JwtRefreshTokenRepository */
+    private JwtRefreshTokenRepository $jwtRefreshTokenRepository;
 
     public function __construct(
         UserRepository $userRepository,
         RolesManager $rolesManager,
         UserRequestParser $userRequestParser,
-        RefreshTokenRepository $refreshTokenRepository
+        JwtRefreshTokenRepository $jwtRefreshTokenRepository
 
     )
     {
         $this->userRepository = $userRepository;
         $this->rolesManager = $rolesManager;
         $this->userRequestParser = $userRequestParser;
-        $this->refreshTokenRepository = $refreshTokenRepository;
+        $this->jwtRefreshTokenRepository = $jwtRefreshTokenRepository;
     }
 
     /**
+     *
      * @Route("/store", name="store", methods={"POST"})
      * @param Request $request
      * @param UserPasswordEncoderInterface $encoder
@@ -149,7 +150,7 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         $newEmail = $user->getEmail();
 
         if ($oldEmail != $newEmail) {
-            $this->refreshTokenRepository->updateTokenEmail($oldEmail, $newEmail);
+            $this->jwtRefreshTokenRepository->updateTokenEmail($oldEmail, $newEmail);
         }
 
         return new JsonResponse($user->toArray());
@@ -178,7 +179,7 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
             );
         }
 
-        $this->refreshTokenRepository->removeAllByEmail($user->getEmail());
+        $this->jwtRefreshTokenRepository->removeAllByEmail($user->getEmail());
 
         return new JsonResponse(['success' => true]);
     }

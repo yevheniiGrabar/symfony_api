@@ -4,14 +4,14 @@ namespace App\Controller;
 
 use Carbon\Carbon;
 use App\Entity\User;
-use App\Entity\RefreshToken;
 use Doctrine\ORM\ORMException;
 use App\Services\RolesManager;
+use App\Entity\JwtRefreshToken;
 use App\Repository\UserRepository;
 use App\Services\UserRequestParser;
 use App\Services\UserRequestValidator;
 use Doctrine\ORM\OptimisticLockException;
-use App\Repository\RefreshTokenRepository;
+use App\Repository\JwtRefreshTokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -33,18 +33,18 @@ class AuthController extends AbstractController
     /** @var UserRequestParser */
     private UserRequestParser $userRequestParser;
 
-    /** @var RefreshTokenRepository */
-    private RefreshTokenRepository $refreshTokenRepository;
+    /** @var JwtRefreshTokenRepository */
+    private JwtRefreshTokenRepository $jwtRefreshTokenRepository;
 
     public function __construct(
         UserRepository $userRepository,
         UserRequestParser $userRequestParser,
-        RefreshTokenRepository $refreshTokenRepository
+        JwtRefreshTokenRepository $jwtRefreshTokenRepository
     )
     {
         $this->userRepository = $userRepository;
         $this->userRequestParser = $userRequestParser;
-        $this->refreshTokenRepository = $refreshTokenRepository;
+        $this->jwtRefreshTokenRepository = $jwtRefreshTokenRepository;
     }
 
     /**
@@ -121,8 +121,8 @@ class AuthController extends AbstractController
         $token = $tokenManager->createFromPayload($user, $user->toArray());
         $authHandler->handleAuthenticationSuccess($user, $token);
 
-        /** @var RefreshToken|null $userToken */
-        $userToken = $this->refreshTokenRepository->findOneBy(['username' => $request->email], ['id' => 'DESC']);
+        /** @var JwtRefreshToken|null $userToken */
+        $userToken = $this->jwtRefreshTokenRepository->findOneBy(['username' => $request->email], ['id' => 'DESC']);
 
         if (!$userToken) {
             return new JsonResponse(
@@ -131,7 +131,7 @@ class AuthController extends AbstractController
             );
         }
 
-        return new JsonResponse(['token' => $token, 'refresh_token' => $userToken->refresh_token]);
+        return new JsonResponse(['token' => $token, 'refresh_token' => $userToken->getRefreshToken()]);
     }
 
     /**
@@ -168,8 +168,8 @@ class AuthController extends AbstractController
     {
         $refreshToken = (string)$request->get('refresh_token', '');
 
-        /** @var RefreshToken|null $refreshTokenEntity */
-        $refreshTokenEntity = $this->refreshTokenRepository->findOneBy(['refresh_token' => $refreshToken]);
+        /** @var JwtRefreshToken|null $refreshTokenEntity */
+        $refreshTokenEntity = $this->jwtRefreshTokenRepository->findOneBy(['refresh_token' => $refreshToken]);
 
         if (!$refreshTokenEntity) {
             return new JsonResponse(

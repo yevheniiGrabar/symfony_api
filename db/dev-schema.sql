@@ -14,7 +14,7 @@ CREATE TABLE `access_token` (
   `token` longtext COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE `refresh_tokens` (
+CREATE TABLE `jwt_refresh_token` (
   `id` int(11) NOT NULL,
   `refresh_token` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `username` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -39,7 +39,7 @@ ALTER TABLE `access_token`
   ADD PRIMARY KEY (`id`),
   ADD KEY `IDX_B6A2DD68A76ED395` (`user_id`);
 
-ALTER TABLE `refresh_tokens`
+ALTER TABLE `jwt_refresh_token`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `UNIQ_9BACE7E1C74F2195` (`refresh_token`);
 
@@ -56,7 +56,7 @@ ALTER TABLE `user`
 ALTER TABLE `access_token`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
-ALTER TABLE `refresh_tokens`
+ALTER TABLE `jwt_refresh_token`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `role`
