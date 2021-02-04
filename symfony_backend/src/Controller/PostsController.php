@@ -51,7 +51,7 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
         $userId = $userInterface->getId();
         $user = $this->userRepository->findOneBy(['id' => $userId]);
 
-        if(!$user) {
+        if (!$user) {
             return new JsonResponse(UserRequestValidator::USER_NOT_FOUND_MESSAGE, Response::HTTP_NOT_FOUND);
         }
 
@@ -82,7 +82,7 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
         $post = $this->postRepository->find($id);
 
         if (!$post) {
-            return new JsonResponse(null,Response::HTTP_NOT_FOUND);
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
 
         return new JsonResponse($post->getPostData());
@@ -103,6 +103,7 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
             return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
         $post = $this->postRepository->find($id);
+
         if (!$post) {
             return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
@@ -118,9 +119,25 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
 
     /**
      * * @Route("/delete/{id}", name="delete", methods={"DELETE"})
+     * @param int $id
      */
-    public function deleteAction()
+    public function deleteAction(int $id): JsonResponse
     {
-        dd(4);
+        $post = $this->postRepository->find($id);
+
+        if (!$post) {
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        }
+
+        $deleted = $this->postRepository->delete($post);
+
+        if (!$deleted) {
+            return new JsonResponse(
+                ['errors' => UserRequestValidator::ENTITY_WAS_NOT_REMOVED_MESSAGE],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+        
+        return new JsonResponse(['message' => 'Post deleted successfully'], Response::HTTP_OK);
     }
 }
