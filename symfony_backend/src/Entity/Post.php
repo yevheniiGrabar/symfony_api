@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PostRepository;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=PostRepository::class)
@@ -29,14 +30,14 @@ class Post implements EntityInterface
     private string $content;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", options={"default"="CURRENT_TIMESTAMP"}, name="created_at")
      */
-    private DateTimeInterface $created_at;
+    private DateTimeInterface $createdAt;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime",options={"default"="CURRENT_TIMESTAMP"}, name="updated_at")
      */
-    private DateTimeInterface $updated_at;
+    private DateTimeInterface $updatedAt;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="Post")
@@ -95,16 +96,16 @@ class Post implements EntityInterface
      */
     public function getCreatedAt(): DateTimeInterface
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
-     * @param DateTimeInterface $created_at
+     * @param DateTimeInterface $createdAt
      * @return $this
      */
-    public function setCreatedAt(DateTimeInterface $created_at): self
+    public function setCreatedAt(DateTimeInterface $createdAt): self
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -114,24 +115,24 @@ class Post implements EntityInterface
      */
     public function getUpdatedAt(): DateTimeInterface
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
     /**
-     * @param DateTimeInterface $updated_at
+     * @param DateTimeInterface $updatedAt
      * @return $this
      */
-    public function setUpdatedAt(DateTimeInterface $updated_at): self
+    public function setUpdatedAt(DateTimeInterface $updatedAt): self
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
 
     /**
-     * @return User|null
+     * @return User
      */
-    public function getUser(): ?User
+    public function getUser(): User
     {
         return $this->user;
     }
@@ -145,6 +146,18 @@ class Post implements EntityInterface
         $this->user = $user;
 
         return $this;
+    }
+
+    /** @return array */
+    public function getPostData(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'title' => $this->getTitle(),
+            'content' => $this->getContent(),
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt(),
+        ];
     }
 }
 

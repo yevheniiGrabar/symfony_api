@@ -21,6 +21,15 @@ CREATE TABLE `jwt_refresh_token` (
   `valid` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `post` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `role` (
   `id` int(11) NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
@@ -41,7 +50,11 @@ ALTER TABLE `access_token`
 
 ALTER TABLE `jwt_refresh_token`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `UNIQ_9BACE7E1C74F2195` (`refresh_token`);
+  ADD UNIQUE KEY `UNIQ_9F3D9535C74F2195` (`refresh_token`);
+
+ALTER TABLE `post`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_5A8A6C8DA76ED395` (`user_id`);
 
 ALTER TABLE `role`
   ADD PRIMARY KEY (`id`),
@@ -59,6 +72,9 @@ ALTER TABLE `access_token`
 ALTER TABLE `jwt_refresh_token`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
+ALTER TABLE `post`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
 ALTER TABLE `role`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
@@ -68,6 +84,9 @@ ALTER TABLE `user`
 
 ALTER TABLE `access_token`
   ADD CONSTRAINT `FK_B6A2DD68A76ED395` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
+
+ALTER TABLE `post`
+  ADD CONSTRAINT `FK_5A8A6C8DA76ED395` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
 
 ALTER TABLE `user`
   ADD CONSTRAINT `FK_8D93D649D60322AC` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`);

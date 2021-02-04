@@ -57,9 +57,10 @@ class User implements EntityInterface, JWTUserInterface
     private $accessTokens;
 
     /**
-     * @ORM\OneToMany(targetEntity=post::class, mappedBy="user")
+     * @ORM\OneToMany(targetEntity=Post::class, mappedBy="user")
+     * @var Collection|Post[]
      */
-    private ArrayCollection $post;
+    private $post;
 
     public function __construct()
     {
@@ -288,14 +289,14 @@ class User implements EntityInterface, JWTUserInterface
     }
 
     /**
-     * @return Collection|post[]
+     * @return Collection|Post[]
      */
     public function getPost(): Collection
     {
         return $this->post;
     }
 
-    public function addPost(post $post): self
+    public function addPost(Post $post): self
     {
         if (!$this->post->contains($post)) {
             $this->post[] = $post;
@@ -305,7 +306,7 @@ class User implements EntityInterface, JWTUserInterface
         return $this;
     }
 
-    public function removePost(post $post): self
+    public function removePost(Post $post): self
     {
         if ($this->post->removeElement($post)) {
             // set the owning side to null (unless already changed)

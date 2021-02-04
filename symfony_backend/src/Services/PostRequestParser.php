@@ -16,6 +16,8 @@ class PostRequestParser
         $userPostRequest = $this->PostParseRequest($request);
         $userPostRequest->title = (string)$request->get('title', '');
         $userPostRequest->content = (string)$request->get('content', '');
+        $userPostRequest->createdAt = $request->get('createdAt', '');
+        $userPostRequest->updatedAt = $request->get('updatedAt', '');
 
         return $userPostRequest;
     }

@@ -2,6 +2,8 @@
 
 namespace App\Requests;
 
+use Carbon\Carbon;
+
 class UserPostRequest
 {
     /** @var string */
@@ -10,7 +12,8 @@ class UserPostRequest
     /** @var string */
     public string $content = '';
 
-    public $created_at = '';
+    public $createdAt = '';
 
-    public $updated_at = '';
+    public $updatedAt = '';
+
 }
