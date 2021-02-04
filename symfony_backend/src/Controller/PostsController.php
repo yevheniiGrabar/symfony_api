@@ -6,8 +6,6 @@ use App\Entity\Post;
 use App\Entity\User;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
-use App\Services\PostRequestParser;
-use App\Services\UserRequestParser;
 use App\Services\UserRequestValidator;
 use Carbon\Carbon;
 use Doctrine\ORM\OptimisticLockException;
@@ -30,19 +28,14 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
     /** @var UserRepository */
     private UserRepository $userRepository;
 
-    /** @var PostRequestParser */
-    private PostRequestParser $postRequestParser;
-
     public function __construct
     (
         PostRepository $postRepository,
-        UserRepository $userRepository,
-        PostRequestParser $postRequestParser
+        UserRepository $userRepository
     )
     {
         $this->postRepository = $postRepository;
         $this->userRepository = $userRepository;
-        $this->postRequestParser = $postRequestParser;
     }
 
     /**
@@ -97,9 +90,30 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
 
     /**
      * * @Route("/update/{id}", name="update", methods={"PUT"})
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function updateAction(): JsonResponse
+    public function updateAction(int $id, Request $request): JsonResponse
     {
+        /** @var User|null $user */
+        $user = $this->userRepository->find($id);
+        //dd($user->getId());
+        if (!$user) {
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        }
+        $post = $this->postRepository->find($id);
+        if (!$post) {
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        }
+
+        $post->setTitle($request->get('title', ''));
+        $post->setContent($request->get('content', ''));
+        $post->setUpdatedAt(Carbon::now());
+        $post->setUser($user);
+        $this->postRepository->plush($post);
+
+        return new JsonResponse($post->getPostData());
     }
 
     /**
