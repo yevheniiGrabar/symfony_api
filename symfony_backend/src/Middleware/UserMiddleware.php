@@ -85,10 +85,6 @@ class UserMiddleware implements EventSubscriberInterface
             throw new HttpException(Response::HTTP_NOT_FOUND, 'Post not found');
         }
 
-        if ($post->getUser()->getId() != $user->getId()) {
-            throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Access denied');
-        }
-
         if ($user->isAdmin) {
             return;
         }
@@ -98,6 +94,10 @@ class UserMiddleware implements EventSubscriberInterface
 
         if (!in_array($requestUri, $defaultUserEndpoints)) {
             throw new HttpException(Response::HTTP_FORBIDDEN, 'Access denied');
+        }
+
+        if ($post->getUser()->getId() !== $user->getId()) {
+            throw new HttpException(Response::HTTP_FORBIDDEN, 'Access denied for current user');
         }
 
         $roleId = (int)$this->rolesManager->getDefaultRole()->getId();
@@ -123,7 +123,9 @@ class UserMiddleware implements EventSubscriberInterface
             $this->router->generate('users.show', ['id' => $userId]),
             $this->router->generate('users.update', ['id' => $userId]),
             $this->router->generate('users.delete', ['id' => $userId]),
-            $this->router->generate('posts.show', ['id' => $postId])
+            $this->router->generate('posts.show', ['id' => $postId]),
+            $this->router->generate('posts.update', ['id' => $postId]),
+            $this->router->generate('posts.delete', ['id' => $postId]),
         ];
     }
 }
