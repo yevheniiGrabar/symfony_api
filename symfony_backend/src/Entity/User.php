@@ -289,7 +289,7 @@ class User implements EntityInterface, JWTUserInterface
     }
 
     /**
-     * @return Collection|Post[]
+     * @return Collection
      */
     public function getPost(): Collection
     {
