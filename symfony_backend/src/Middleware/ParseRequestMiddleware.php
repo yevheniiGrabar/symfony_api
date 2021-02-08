@@ -25,7 +25,7 @@ class ParseRequestMiddleware implements EventSubscriberInterface
         }
 
         $request = $event->getRequest();
-        $request = JsonRequestDataKeeper::keepJson($request);
+        JsonRequestDataKeeper::keepJson($request);
     }
 
     /** @return array */

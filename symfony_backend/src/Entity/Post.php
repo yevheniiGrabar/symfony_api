@@ -3,9 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\PostRepository;
+use Carbon\Carbon;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=PostRepository::class)
@@ -16,6 +16,7 @@ class Post implements EntityInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @var int
      */
     private int $id;
 
@@ -40,8 +41,9 @@ class Post implements EntityInterface
     private DateTimeInterface $updatedAt;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="Post")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="posts")
      * @ORM\JoinColumn(nullable=false)
+     * @var User
      */
     private User $user;
 
@@ -51,6 +53,17 @@ class Post implements EntityInterface
     public function getId(): int
     {
         return $this->id;
+    }
+
+    /**
+     * @param int $id
+     * @return $this
+     */
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     /**
@@ -96,7 +109,7 @@ class Post implements EntityInterface
      */
     public function getCreatedAt(): DateTimeInterface
     {
-        return $this->createdAt;
+        return Carbon::parse($this->createdAt);
     }
 
     /**
@@ -115,7 +128,7 @@ class Post implements EntityInterface
      */
     public function getUpdatedAt(): DateTimeInterface
     {
-        return $this->updatedAt;
+        return Carbon::parse($this->updatedAt);
     }
 
     /**
@@ -148,15 +161,17 @@ class Post implements EntityInterface
         return $this;
     }
 
-    /** @return array */
-    public function getPostData(): array
+    /**
+     * @return array
+     */
+    public function toArray(): array
     {
         return [
             'id' => $this->getId(),
             'title' => $this->getTitle(),
             'content' => $this->getContent(),
-            'createdAt' => $this->getCreatedAt(),
-            'updatedAt' => $this->getUpdatedAt(),
+            'createdAt' => (string)$this->getCreatedAt(),
+            'updatedAt' => (string)$this->getUpdatedAt(),
         ];
     }
 }

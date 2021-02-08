@@ -17,9 +17,8 @@ abstract class AbstractRepository extends ServiceEntityRepository
     }
 
     /**
+     * @todo: Throw Runtime or custom exception and catch in ExceptionHandler (return JsonResponse with an error)
      * @param EntityInterface $entity
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function plush(EntityInterface $entity): void
     {

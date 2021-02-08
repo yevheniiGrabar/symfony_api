@@ -15,12 +15,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
- * @Route("api/posts", name="posts.")
+ * @Route("/api/posts", name="posts.")
  */
-class PostsController extends AbstractController implements TokenAuthenticatedController
+class PostsController extends AbstractController
 {
     /** @var PostRepository */
     private PostRepository $postRepository;
@@ -28,51 +28,43 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
     /** @var UserRepository */
     private UserRepository $userRepository;
 
+    /** @var TokenStorageInterface */
+    private TokenStorageInterface $storage;
+
     public function __construct
     (
         PostRepository $postRepository,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        TokenStorageInterface $storage
     )
     {
         $this->postRepository = $postRepository;
         $this->userRepository = $userRepository;
+        $this->storage = $storage;
     }
 
     /**
      * @Route("/store", name="store", methods={"POST"})
      * @param Request $request
-     * @param UserInterface $userInterface
+     * @param TokenStorageInterface $storage
      * @return JsonResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
-    public function storeAction(Request $request, UserInterface $userInterface): JsonResponse
+    public function storeAction(Request $request): JsonResponse
     {
+        $title = (string)$request->get('title', '');
+        $content = (string)$request->get('content', '');
+        // @todo: validate request
 
-        $userId = $userInterface->getId();
-        $user = $this->userRepository->findOneBy(['id' => $userId]);
-
-        if (!$user) {
-            return new JsonResponse(UserRequestValidator::USER_NOT_FOUND_MESSAGE, Response::HTTP_NOT_FOUND);
-        }
-
-        if ($userId != $user->id) {
-            return new JsonResponse(UserRequestValidator::ACCESS_DENIED_MESSAGE, Response::HTTP_FORBIDDEN);
-        }
-
-        $postDate = $this->postRepository->find('createdAt');
-        $postDate = Carbon::now($postDate);
         $post = new Post();
-        $post->setTitle($request->get('title', ''));
-        $post->setContent($request->get('content', ''));
+        $post->setTitle($title);
+        $post->setContent($content);
         $post->setCreatedAt(Carbon::now());
-        $post->setUpdatedAt($postDate);
+        $post->setUpdatedAt(Carbon::now());
+        $post->setUser($this->getCurrentUser());
 
-        /** @var User $user */
-        $post->setUser($user);
         $this->postRepository->plush($post);
 
-        return new JsonResponse($post->getPostData());
+        return new JsonResponse($post->toArray());
     }
 
     /**
@@ -88,42 +80,53 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
             return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
 
-        return new JsonResponse($post->getPostData());
+        if (!$this->currentUserIsPostOwner($post)) {
+            return new JsonResponse(['errors' => 'Access Denied'], Response::HTTP_FORBIDDEN);
+        }
+
+        return new JsonResponse($post->toArray());
     }
 
     /**
-     * * @Route("/update/{id}", name="update", methods={"PUT"})
+     * @Route("/update/{id}", name="update", methods={"PUT"})
      * @param int $id
      * @param Request $request
      * @return JsonResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function updateAction(int $id, Request $request): JsonResponse
     {
-        /** @var User|null $user */
-        $user = $this->userRepository->find($id);
+        $user = $this->getCurrentUser();
+
         if (!$user) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+            return new JsonResponse
+            (['errors' => UserRequestValidator::USER_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
         }
+
         $post = $this->postRepository->find($id);
 
         if (!$post) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['errors' => 'Post not found'], Response::HTTP_NOT_FOUND);
         }
-        $post->setTitle($request->get('title', ''));
-        $post->setContent($request->get('content', ''));
-        $post->setUpdatedAt(Carbon::now());
-        $post->setUser($user);
 
-        /** @var Post $post */
+        if (!$this->currentUserIsPostOwner($post)) {
+            return new JsonResponse(['errors' => 'Access Denied'], Response::HTTP_FORBIDDEN);
+        }
+
+        $title = (string)$request->get('title', '');
+        $content = (string)$request->get('content', '');
+
+        $post->setTitle($title);
+        $post->setContent($content);
+        $post->setUpdatedAt(Carbon::now());
+        $post->setUser($this->getCurrentUser());
+
         $this->postRepository->plush($post);
 
-        return new JsonResponse($post->getPostData());
+        return new JsonResponse($post->toArray());
     }
 
     /**
-     * * @Route("/delete/{id}", name="delete", methods={"DELETE"})
+     * @Route("/delete/{id}", name="delete", methods={"DELETE"})
      * @param int $id
      * @return JsonResponse
      */
@@ -132,10 +135,13 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
         $post = $this->postRepository->find($id);
 
         if (!$post) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['errors' => 'Post not found'], Response::HTTP_NOT_FOUND);
         }
 
-        /** @var Post $post */
+        if (!$this->currentUserIsPostOwner($post)) {
+            return new JsonResponse(['errors' => 'Access Denied'], Response::HTTP_FORBIDDEN);
+        }
+
         $deleted = $this->postRepository->delete($post);
 
         if (!$deleted) {
@@ -147,4 +153,29 @@ class PostsController extends AbstractController implements TokenAuthenticatedCo
 
         return new JsonResponse(['message' => 'Post deleted successfully'], Response::HTTP_OK);
     }
+
+    /**
+     * @return User
+     */
+    private function getCurrentUser(): User
+    {
+        /** @var User $user */
+        $user = $this->storage->getToken()->getUser();
+        $userId = $user->getId();
+
+        /** @var User $user */
+        $user = $this->userRepository->find($userId);
+
+        return $user;
+    }
+
+    /**
+     * @param Post $post
+     * @return bool
+     */
+    private function currentUserIsPostOwner(Post $post): bool
+    {
+        return $post->getUser()->getId() == $this->getCurrentUser()->getId();
+    }
 }
+
