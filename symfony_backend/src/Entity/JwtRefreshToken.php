@@ -27,3 +27,4 @@ class JwtRefreshToken extends AbstractRefreshToken implements EntityInterface
         return $this->id;
     }
 }
+

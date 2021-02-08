@@ -21,4 +21,3 @@ class UserRepository extends AbstractRepository
         return User::class;
     }
 }
-

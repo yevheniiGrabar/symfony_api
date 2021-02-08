@@ -37,4 +37,3 @@ class RoleRepository extends AbstractRepository
         return Role::class;
     }
 }
-

@@ -18,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
- * @Route("api/users", name="users.")
+ * @Route("/api/users", name="users.")
  */
 class UsersController extends AbstractController implements TokenAuthenticatedController
 {

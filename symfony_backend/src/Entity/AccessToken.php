@@ -25,7 +25,7 @@ class AccessToken implements EntityInterface
     private string $token;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="accessToken")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="accessTokens")
      * @ORM\JoinColumn(nullable=false)
      * @var User
      */

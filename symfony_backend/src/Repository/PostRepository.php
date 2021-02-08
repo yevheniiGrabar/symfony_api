@@ -21,4 +21,3 @@ class PostRepository extends AbstractRepository
         return Post::class;
     }
 }
-
