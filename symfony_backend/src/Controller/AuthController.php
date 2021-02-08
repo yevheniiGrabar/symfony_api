@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Constants\ResponseMessages;
 use Carbon\Carbon;
 use App\Entity\User;
 use Doctrine\ORM\ORMException;
@@ -66,7 +67,7 @@ class AuthController extends AbstractController
 
         if ($this->userRepository->findOneBy(['email' => $request->email])) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE], Response::HTTP_UNPROCESSABLE_ENTITY);
+                ['errors' => ResponseMessages::EMAIL_ALREADY_IN_USE_MESSAGE], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $user = new User();
@@ -105,14 +106,14 @@ class AuthController extends AbstractController
 
         if (!$user) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::USER_NOT_FOUND_MESSAGE],
+                ['errors' => ResponseMessages::USER_NOT_FOUND_MESSAGE],
                 Response::HTTP_NOT_FOUND
             );
         }
 
         if (!$encoder->isPasswordValid($user, $request->password)) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::PASSWORD_IS_INVALID_MESSAGE],
+                ['errors' => ResponseMessages::PASSWORD_IS_INVALID_MESSAGE],
                 Response::HTTP_UNAUTHORIZED
             );
         }
@@ -126,7 +127,7 @@ class AuthController extends AbstractController
 
         if (!$userToken) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::REFRESH_TOKEN_NOT_FOUND_MESSAGE],
+                ['errors' => ResponseMessages::REFRESH_TOKEN_NOT_FOUND_MESSAGE],
                 Response::HTTP_NOT_FOUND
             );
         }
@@ -173,7 +174,7 @@ class AuthController extends AbstractController
 
         if (!$refreshTokenEntity) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::REFRESH_TOKEN_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
+                ['errors' => ResponseMessages::REFRESH_TOKEN_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
         }
 
         $currentDate = Carbon::now();
@@ -181,7 +182,7 @@ class AuthController extends AbstractController
 
         if ($currentDate > $refreshTokenDate) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::EXPIRED_REFRESH_TOKEN_MESSAGE], Response::HTTP_UNAUTHORIZED);
+                ['errors' => ResponseMessages::EXPIRED_REFRESH_TOKEN_MESSAGE], Response::HTTP_UNAUTHORIZED);
         }
 
         /** @var User $user */

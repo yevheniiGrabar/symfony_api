@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Constants\ResponseMessages;
 use App\Entity\User;
 use App\Repository\JwtRefreshTokenRepository;
 use App\Services\RolesManager;
@@ -68,7 +69,7 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
 
         if ($this->userRepository->findOneBy(['email' => $request->email])) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE],
+                ['errors' => ResponseMessages::EMAIL_ALREADY_IN_USE_MESSAGE],
                 Response::HTTP_UNPROCESSABLE_ENTITY
             );
         }
@@ -97,7 +98,7 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         $user = $this->userRepository->find($id);
 
         if (!$user) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+            return new JsonResponse(ResponseMessages::USER_NOT_FOUND_MESSAGE, Response::HTTP_NOT_FOUND);
         }
 
         $user->setIsAdmin($this->rolesManager->isAdmin($user));
@@ -127,7 +128,7 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         $user = $this->userRepository->find($id);
 
         if (!$user) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+            return new JsonResponse(ResponseMessages::USER_NOT_FOUND_MESSAGE, Response::HTTP_NOT_FOUND);
         }
 
         if (
@@ -135,7 +136,7 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
             && $this->userRepository->findOneBy(['email' => $request->email])
         ) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE],
+                ['errors' => ResponseMessages::EMAIL_ALREADY_IN_USE_MESSAGE],
                 Response::HTTP_UNPROCESSABLE_ENTITY
             );
         }
@@ -167,14 +168,14 @@ class UsersController extends AbstractController implements TokenAuthenticatedCo
         $user = $this->userRepository->find($id);
 
         if (!$user) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+            return new JsonResponse(ResponseMessages::USER_NOT_FOUND_MESSAGE, Response::HTTP_NOT_FOUND);
         }
 
         $removed = $this->userRepository->delete($user);
 
         if (!$removed) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::ENTITY_WAS_NOT_REMOVED_MESSAGE],
+                ['errors' => ResponseMessages::ENTITY_WAS_NOT_REMOVED_MESSAGE],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }

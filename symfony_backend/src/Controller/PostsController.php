@@ -2,19 +2,17 @@
 
 namespace App\Controller;
 
+use Carbon\Carbon;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
-use App\Services\UserRequestValidator;
-use Carbon\Carbon;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Constants\ResponseMessages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
@@ -77,11 +75,11 @@ class PostsController extends AbstractController
         $post = $this->postRepository->find($id);
 
         if (!$post) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['errors' => ResponseMessages::POST_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
         }
 
         if (!$this->currentUserIsPostOwner($post)) {
-            return new JsonResponse(['errors' => 'Access Denied'], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['errors' => ResponseMessages::ACCESS_DENIED_MESSAGE], Response::HTTP_FORBIDDEN);
         }
 
         return new JsonResponse($post->toArray());
@@ -99,17 +97,17 @@ class PostsController extends AbstractController
 
         if (!$user) {
             return new JsonResponse
-            (['errors' => UserRequestValidator::USER_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
+            (['errors' => ResponseMessages::USER_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
         }
 
         $post = $this->postRepository->find($id);
 
         if (!$post) {
-            return new JsonResponse(['errors' => 'Post not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['errors' => ResponseMessages::POST_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
         }
 
         if (!$this->currentUserIsPostOwner($post)) {
-            return new JsonResponse(['errors' => 'Access Denied'], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['errors' => ResponseMessages::ACCESS_DENIED_MESSAGE], Response::HTTP_FORBIDDEN);
         }
 
         $title = (string)$request->get('title', '');
@@ -135,23 +133,23 @@ class PostsController extends AbstractController
         $post = $this->postRepository->find($id);
 
         if (!$post) {
-            return new JsonResponse(['errors' => 'Post not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['errors' => ResponseMessages::POST_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
         }
 
         if (!$this->currentUserIsPostOwner($post)) {
-            return new JsonResponse(['errors' => 'Access Denied'], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['errors' => ResponseMessages::ACCESS_DENIED_MESSAGE], Response::HTTP_FORBIDDEN);
         }
 
         $deleted = $this->postRepository->delete($post);
 
         if (!$deleted) {
             return new JsonResponse(
-                ['errors' => UserRequestValidator::ENTITY_WAS_NOT_REMOVED_MESSAGE],
+                ['errors' => ResponseMessages::ENTITY_WAS_NOT_REMOVED_MESSAGE],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
 
-        return new JsonResponse(['message' => 'Post deleted successfully'], Response::HTTP_OK);
+        return new JsonResponse(['message' => ResponseMessages::POST_DELETED_SUCCESSFULLY], Response::HTTP_OK);
     }
 
     /**

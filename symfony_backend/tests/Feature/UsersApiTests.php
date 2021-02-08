@@ -2,6 +2,7 @@
 
 namespace App\Tests\Feature;
 
+use App\Constants\ResponseMessages;
 use App\Services\UserRequestValidator;
 use App\Tests\TestCases\FeatureTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +15,7 @@ class UsersApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_FORBIDDEN);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::ACCESS_DENIED_MESSAGE, $this->response['errors']
+            ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']
         );
     }
 
@@ -56,7 +57,7 @@ class UsersApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE, $this->response['errors']
+            ResponseMessages::EMAIL_ALREADY_IN_USE_MESSAGE, $this->response['errors']
         );
     }
 
@@ -70,7 +71,7 @@ class UsersApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
+            ResponseMessages::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
         );
     }
 
@@ -83,7 +84,7 @@ class UsersApiTests extends FeatureTestCase
         ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateWithoutName()
@@ -95,7 +96,7 @@ class UsersApiTests extends FeatureTestCase
         ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::NAME_IS_REQUIRE_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::NAME_IS_REQUIRE_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateWithoutEmail()
@@ -107,7 +108,7 @@ class UsersApiTests extends FeatureTestCase
         ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::EMAIL_IS_REQUIRED_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::EMAIL_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateWithoutPassword()
@@ -119,7 +120,7 @@ class UsersApiTests extends FeatureTestCase
         ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::PASSWORD_IS_REQUIRED_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::PASSWORD_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
     public function testDelete(): void
@@ -134,7 +135,7 @@ class UsersApiTests extends FeatureTestCase
         $this->get('/api/users/show/' . self::EXISTING_ADMIN_ID, $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_FORBIDDEN);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::ACCESS_DENIED_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']);
 
     }
 
@@ -144,7 +145,7 @@ class UsersApiTests extends FeatureTestCase
         $this->put('/api/users/update/' . self::EXISTING_ADMIN_ID, [], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_FORBIDDEN);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::ACCESS_DENIED_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']);
     }
 
     public function testDeleteAnotherUser()
@@ -153,7 +154,7 @@ class UsersApiTests extends FeatureTestCase
         $this->delete('/api/users/delete/' . self::EXISTING_ADMIN_ID,);
         $this->assertStatusCode(Response::HTTP_FORBIDDEN);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::ACCESS_DENIED_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateIfAdminRole()

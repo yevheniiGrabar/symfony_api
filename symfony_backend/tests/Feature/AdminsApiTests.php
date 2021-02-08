@@ -2,6 +2,7 @@
 
 namespace App\Tests\Feature;
 
+use App\Constants\ResponseMessages;
 use App\Services\UserRequestValidator;
 use App\Tests\TestCases\FeatureTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,7 +39,7 @@ class AdminsApiTests extends FeatureTestCase
         ], $this->getAdminAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::ROLE_IS_REQUIRED_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::ROLE_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
     public function testAdminStoreIfInvalidName()
@@ -50,7 +51,7 @@ class AdminsApiTests extends FeatureTestCase
             'role_id' => '2'
         ], $this->getAdminAuthClient());
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
@@ -64,7 +65,7 @@ class AdminsApiTests extends FeatureTestCase
         ], $this->getAdminAuthClient());
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE, $this->response['errors']
+            ResponseMessages::EMAIL_ALREADY_IN_USE_MESSAGE, $this->response['errors']
         );
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
@@ -79,7 +80,7 @@ class AdminsApiTests extends FeatureTestCase
         ], $this->getAdminAuthClient());
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
+            ResponseMessages::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
         );
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }

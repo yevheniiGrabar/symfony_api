@@ -2,6 +2,7 @@
 
 namespace App\Tests\Feature;
 
+use App\Constants\ResponseMessages;
 use App\Services\UserRequestValidator;
 use App\Tests\TestCases\FeatureTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,7 +37,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::EMAIL_ALREADY_IN_USE_MESSAGE, $this->response['errors']
+            ResponseMessages::EMAIL_ALREADY_IN_USE_MESSAGE, $this->response['errors']
         );
     }
 
@@ -51,7 +52,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
+            ResponseMessages::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
         );
     }
 
@@ -65,7 +66,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::NAME_IS_REQUIRE_MESSAGE, $this->response['errors']
+            ResponseMessages::NAME_IS_REQUIRE_MESSAGE, $this->response['errors']
         );
     }
 
@@ -79,7 +80,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']
+            ResponseMessages::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']
         );
     }
 
@@ -93,7 +94,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::EMAIL_IS_REQUIRED_MESSAGE, $this->response['errors']
+            ResponseMessages::EMAIL_IS_REQUIRED_MESSAGE, $this->response['errors']
         );
     }
 
@@ -107,7 +108,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::PASSWORD_IS_REQUIRED_MESSAGE, $this->response['errors']
+            ResponseMessages::PASSWORD_IS_REQUIRED_MESSAGE, $this->response['errors']
         );
     }
 
@@ -159,7 +160,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::EXPIRED_REFRESH_TOKEN_MESSAGE, $this->response['errors']
+            ResponseMessages::EXPIRED_REFRESH_TOKEN_MESSAGE, $this->response['errors']
         );
     }
 
@@ -171,7 +172,7 @@ class AuthApiTests extends FeatureTestCase
         ]);
         $this->assertStatusCode(Response::HTTP_NOT_FOUND);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::USER_NOT_FOUND_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::USER_NOT_FOUND_MESSAGE, $this->response['errors']);
     }
 
     public function testLoginWithIncorrectPassword()
@@ -183,7 +184,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::PASSWORD_IS_INVALID_MESSAGE, $this->response['errors']
+            ResponseMessages::PASSWORD_IS_INVALID_MESSAGE, $this->response['errors']
         );
     }
 
@@ -196,7 +197,7 @@ class AuthApiTests extends FeatureTestCase
         $this->assertStatusCode(Response::HTTP_UNAUTHORIZED);
         $this->assertArrayHasKey('errors', $this->response);
         $this->assertStringContainsString(
-            UserRequestValidator::PASSWORD_IS_INVALID_MESSAGE, $this->response['errors']
+            ResponseMessages::PASSWORD_IS_INVALID_MESSAGE, $this->response['errors']
         );
     }
 
@@ -208,7 +209,7 @@ class AuthApiTests extends FeatureTestCase
         ]);
         $this->assertStatusCode(Response::HTTP_NOT_FOUND);
         $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(UserRequestValidator::USER_NOT_FOUND_MESSAGE, $this->response['errors']);
+        $this->assertStringContainsString(ResponseMessages::USER_NOT_FOUND_MESSAGE, $this->response['errors']);
     }
 
     public function testRefreshActionAfterUpdateEmail()

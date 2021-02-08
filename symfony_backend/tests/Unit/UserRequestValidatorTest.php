@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit;
 
+use App\Constants\ResponseMessages;
 use App\Entity\Role;
 use App\Requests\UserRequest;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +27,7 @@ class UserRequestValidatorTest extends TestCase
         $request->role = new Role();
 
         $violations = UserRequestValidator::validate($request, true);
-        $this->assertCount(0, $violations);
+        static::assertCount(0, $violations);
     }
 
     public function testValidateWithoutRole()
@@ -50,7 +51,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(2, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::NAME_IS_TOO_SHORT_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(ResponseMessages::NAME_IS_TOO_SHORT_MESSAGE, $errorMessage);
     }
 
     public function testValidateWithShortName()
@@ -63,7 +64,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(1, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::NAME_IS_TOO_SHORT_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(ResponseMessages::NAME_IS_TOO_SHORT_MESSAGE, $errorMessage);
 
     }
 
@@ -78,7 +79,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(1, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::NAME_IS_TOO_LONG_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(ResponseMessages::NAME_IS_TOO_LONG_MESSAGE, $errorMessage);
     }
 
     public function testValidateWithoutEmail()
@@ -91,7 +92,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(1, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::EMAIL_IS_REQUIRED_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(ResponseMessages::EMAIL_IS_REQUIRED_MESSAGE, $errorMessage);
     }
 
     public function testValidateWithInvalidEmail()
@@ -104,7 +105,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(1, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::EMAIL_IS_INVALID_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(ResponseMessages::EMAIL_IS_INVALID_MESSAGE, $errorMessage);
     }
 
     public function testValidateWithoutPassword()
@@ -117,7 +118,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(2, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::PASSWORD_IS_REQUIRED_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(ResponseMessages::PASSWORD_IS_REQUIRED_MESSAGE, $errorMessage);
     }
 
     public function testValidateWithShortPassword()
@@ -130,7 +131,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(2, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::PASSWORD_IS_TOO_SHORT_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(ResponseMessages::PASSWORD_IS_TOO_SHORT_MESSAGE, $errorMessage);
     }
 
     public function testValidateWithLongPassword()
@@ -143,7 +144,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(1, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::PASSWORD_IS_TOO_LONG_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(ResponseMessages::PASSWORD_IS_TOO_LONG_MESSAGE, $errorMessage);
     }
 
     public function testValidateWithWeakPassword()
@@ -155,7 +156,7 @@ class UserRequestValidatorTest extends TestCase
         $violations = UserRequestValidator::validate($request);
         $this->assertCount(2, $violations);
         $errorMessage = (string)$violations;
-        $this->assertStringContainsString(UserRequestValidator::PASSWORD_IS_COMPROMISED_MESSAGE, $errorMessage);
+        $this->assertStringContainsString(ResponseMessages::PASSWORD_IS_COMPROMISED_MESSAGE, $errorMessage);
     }
 
     /**
