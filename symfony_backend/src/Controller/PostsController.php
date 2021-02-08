@@ -14,6 +14,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Validation;
 
 /**
  * @Route("/api/posts", name="posts.")
@@ -51,7 +54,12 @@ class PostsController extends AbstractController
     {
         $title = (string)$request->get('title', '');
         $content = (string)$request->get('content', '');
-        // @todo: validate request
+
+        $violations = self::validateUserPost($request);
+
+        if (count($violations) > 0) {
+            return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         $post = new Post();
         $post->setTitle($title);
@@ -108,6 +116,12 @@ class PostsController extends AbstractController
 
         if (!$this->currentUserIsPostOwner($post)) {
             return new JsonResponse(['errors' => ResponseMessages::ACCESS_DENIED_MESSAGE], Response::HTTP_FORBIDDEN);
+        }
+
+        $violations = self::validateUserPost($request);
+
+        if (count($violations) > 0) {
+            return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $title = (string)$request->get('title', '');
@@ -174,6 +188,33 @@ class PostsController extends AbstractController
     private function currentUserIsPostOwner(Post $post): bool
     {
         return $post->getUser()->getId() == $this->getCurrentUser()->getId();
+    }
+
+    private static function validateUserPost(Request $request)
+    {
+        $validator = Validation::createValidator();
+
+        $violations = $validator->validate($request->get('title'), [
+            new NotBlank(['message' => ResponseMessages::TITLE_IS_REQUIRED_MESSAGE]),
+            new Length([
+                'min' => 4,
+                'max' => 255,
+                'minMessage' => ResponseMessages::TITLE_IS_TOO_SHORT_MESSAGE,
+                'maxMessage' => ResponseMessages::TITLE_IS_TOO_LONG_MESSAGE,
+            ]),
+        ]);
+        $violations->addAll(
+            $validator->validate($request->get('content'), [
+                new NotBlank(['message' => ResponseMessages::CONTENT_IS_REQUIRED_MESSAGE]),
+                new Length([
+                    'min' => 10,
+                    'max' => 255,
+                    'minMessage' => ResponseMessages::CONTENT_IS_TOO_SHORT_MESSAGE,
+                    'maxMessage' => ResponseMessages::CONTENT_IS_TOO_LONG_MESSAGE,
+                ]),
+            ])
+        );
+        return $violations;
     }
 }
 

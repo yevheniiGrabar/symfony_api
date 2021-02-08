@@ -23,4 +23,11 @@ interface ResponseMessages
     public const USER_NOT_FOUND_MESSAGE = 'User not found';
     public const POST_NOT_FOUND_MESSAGE = 'Post not found';
     public const POST_DELETED_SUCCESSFULLY = 'Post deleted successfully';
+    public const TITLE_IS_REQUIRED_MESSAGE = 'Title is required';
+    public const TITLE_IS_TOO_SHORT_MESSAGE = 'Title is too short';
+    public const TITLE_IS_TOO_LONG_MESSAGE = 'Title is too long';
+    public const CONTENT_IS_REQUIRED_MESSAGE = 'Content is required';
+    public const CONTENT_IS_TOO_SHORT_MESSAGE = 'Content is too short';
+    public const CONTENT_IS_TOO_LONG_MESSAGE = 'Content is too long';
 }
+

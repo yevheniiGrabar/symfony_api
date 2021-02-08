@@ -2,16 +2,16 @@
 
 namespace App\Controller;
 
-use App\Constants\ResponseMessages;
 use App\Entity\User;
-use App\Repository\JwtRefreshTokenRepository;
 use App\Services\RolesManager;
 use Doctrine\ORM\ORMException;
 use App\Repository\UserRepository;
+use App\Constants\ResponseMessages;
 use App\Services\UserRequestParser;
 use App\Services\UserRequestValidator;
 use Doctrine\ORM\OptimisticLockException;
 use Symfony\Component\HttpFoundation\Request;
+use App\Repository\JwtRefreshTokenRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
