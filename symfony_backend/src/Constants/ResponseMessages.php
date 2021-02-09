@@ -41,9 +41,13 @@ interface ResponseMessages
     public const EXISTING_USER_CONTENT = 'Some content for user post';
     public const USER_POST_CREATED_AT = '2021-02-09 10:35:01';
     public const USER_POST_UPDATED_AT = '2021-02-09 10:35:12';
-
     public const NEW_USER_POST_TITLE = 'New User post title';
     public const NEW_USER_POST_CONTENT = 'New User post content';
+
+    public const USER_POST_SHORT_TITLE = 'T';
+    public const USER_POST_SHORT_CONTENT = 'Test';
+
+
 
 
 
