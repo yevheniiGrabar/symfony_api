@@ -27,6 +27,28 @@ class UserPostsApiTests extends FeatureTestCase
         ]);
     }
 
+    public function testStoreIfShortTitle()
+    {
+        $this->post('/api/posts/store', [
+            'title' => '',
+            'content' => ResponseMessages::NEW_USER_POST_CONTENT,
+        ], $this->getUserAuthClient());
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::TITLE_IS_REQUIRED_MESSAGE, $this->response['errors']);
+    }
+
+    public function testStoreIfShortContent()
+    {
+        $this->post('/api/posts/store', [
+            'title' => ResponseMessages::NEW_USER_POST_TITLE,
+            'content' => '',
+        ], $this->getUserAuthClient());
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::CONTENT_IS_REQUIRED_MESSAGE, $this->response['errors']);
+    }
+
     public function testShow()
     {
         $this->get('/api/posts/show/' . ResponseMessages::EXISTING_USER_POST_ID, $this->getUserAuthClient());
@@ -69,7 +91,7 @@ class UserPostsApiTests extends FeatureTestCase
     public function testUpdateIfShortTitle()
     {
         $this->put('/api/posts/update/' . ResponseMessages::EXISTING_USER_POST_ID, [
-            'title' => ResponseMessages::USER_POST_SHORT_TITLE,
+            'title' => ResponseMessages::DEFAULT_POST_SHORT_TITLE,
             'content' => ResponseMessages::EXISTING_USER_CONTENT,
             'updatedAt' => Carbon::now(),
         ], $this->getUserAuthClient());
@@ -82,7 +104,7 @@ class UserPostsApiTests extends FeatureTestCase
     {
         $this->put('/api/posts/update/' . ResponseMessages::EXISTING_USER_POST_ID, [
             'title' => ResponseMessages::EXISTING_USER_TITLE,
-            'content' => ResponseMessages::USER_POST_SHORT_CONTENT,
+            'content' => ResponseMessages::DEFAULT_POST_SHORT_CONTENT,
             'updatedAt' => Carbon::now(),
         ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);

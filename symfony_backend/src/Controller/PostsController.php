@@ -2,12 +2,15 @@
 
 namespace App\Controller;
 
+use App\Services\RolesManager;
 use Carbon\Carbon;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use App\Constants\ResponseMessages;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -31,17 +34,23 @@ class PostsController extends AbstractController
 
     /** @var TokenStorageInterface */
     private TokenStorageInterface $storage;
+    /**
+     * @var RolesManager
+     */
+    private RolesManager $rolesManager;
 
     public function __construct
     (
         PostRepository $postRepository,
         UserRepository $userRepository,
-        TokenStorageInterface $storage
+        TokenStorageInterface $storage,
+        RolesManager $rolesManager
     )
     {
         $this->postRepository = $postRepository;
         $this->userRepository = $userRepository;
         $this->storage = $storage;
+        $this->rolesManager = $rolesManager;
     }
 
     /**
@@ -77,6 +86,8 @@ class PostsController extends AbstractController
      * @Route("/show/{id}", name="show", methods={"GET"})
      * @param int $id
      * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function showAction(int $id): JsonResponse
     {
@@ -84,6 +95,10 @@ class PostsController extends AbstractController
 
         if (!$post) {
             return new JsonResponse(['errors' => ResponseMessages::POST_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($this->currentUserIsAdmin()) {
+            return new JsonResponse($post->toArray());
         }
 
         if (!$this->currentUserIsPostOwner($post)) {
@@ -188,6 +203,17 @@ class PostsController extends AbstractController
     private function currentUserIsPostOwner(Post $post): bool
     {
         return $post->getUser()->getId() == $this->getCurrentUser()->getId();
+    }
+
+    /**
+     * @param User $user
+     * @return bool
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    private function currentUserIsAdmin(): bool
+    {
+        return $this->getCurrentUser()->getRole()->getId() == $this->rolesManager->isAdmin($this->getCurrentUser());
     }
 
     private static function validateUserPost(Request $request)

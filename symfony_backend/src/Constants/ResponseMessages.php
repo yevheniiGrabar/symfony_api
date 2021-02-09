@@ -42,8 +42,9 @@ interface ResponseMessages
     public const NEW_USER_POST_TITLE = 'New User post title';
     public const NEW_USER_POST_CONTENT = 'New User post content';
     public const NEW_ADMIN_POST_TITLE = 'New admin title';
-    public const NEW_ADMIN_POST_CONTENT = 'New admin content';
-    public const USER_POST_SHORT_TITLE = 'T';
-    public const USER_POST_SHORT_CONTENT = 'Test';
+    public const NEW_ADMIN_POST_CONTENT = 'New Post Content';
+    public const DEFAULT_POST_SHORT_TITLE = 'T';
+    public const DEFAULT_POST_SHORT_CONTENT = 'Test';
+
 }
 
