@@ -7,9 +7,9 @@ use App\Tests\TestCases\FeatureTestCase;
 use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 
-class PostsApiTests extends FeatureTestCase
+class UserPostsApiTests extends FeatureTestCase
 {
-    public function testStoreIfUser()
+    public function testStore()
     {
         $this->post('/api/posts/store', [
             'title' => ResponseMessages::EXISTING_USER_TITLE,
@@ -27,7 +27,7 @@ class PostsApiTests extends FeatureTestCase
         ]);
     }
 
-    public function testShowIfUser()
+    public function testShow()
     {
         $this->get('/api/posts/show/' . ResponseMessages::EXISTING_USER_POST_ID, $this->getUserAuthClient());
         $this->assertResponseOk();
