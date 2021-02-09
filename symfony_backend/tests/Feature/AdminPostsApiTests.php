@@ -8,23 +8,23 @@ use Carbon\Carbon;
 
 class AdminPostsApiTests extends FeatureTestCase
 {
-//    public function testStore()
-//    {
-//        $this->post('/api/posts/store', [
-//            'title' => ResponseMessages::EXISTING_ADMIN_TITLE,
-//            'content' => ResponseMessages::EXISTING_ADMIN_CONTENT,
-//        ], $this->getAdminAuthClient());
-//
-//        self::assertArrayHasKey('id', $this->response);
-//        self::assertGreaterThan(0, $this->response);
-//        //unset($this->response['id']);
-//        $this->assertResponse([
-//            'title' => ResponseMessages::EXISTING_ADMIN_TITLE,
-//            'content' => ResponseMessages::EXISTING_ADMIN_CONTENT,
-//            'createdAt' => Carbon::now(),
-//            'updatedAt' => Carbon::now(),
-//        ]);
-//    }
+    public function testStore()
+    {
+        $this->post('/api/posts/store', [
+            'title' => ResponseMessages::EXISTING_ADMIN_TITLE,
+            'content' => ResponseMessages::EXISTING_ADMIN_CONTENT,
+        ], $this->getAdminAuthClient());
+
+        self::assertArrayHasKey('id', $this->response);
+        self::assertGreaterThan(0, $this->response);
+        unset($this->response['id']);
+        $this->assertResponse([
+            'title' => $this->response['title'],
+            'content' => $this->response['content'],
+            'createdAt' => $this->response['createdAt'],
+            'updatedAt' => $this->response['updatedAt'],
+        ]);
+    }
 
     public function testShow()
     {
@@ -41,25 +41,25 @@ class AdminPostsApiTests extends FeatureTestCase
 
     public function testUpdate()
     {
-        $this->put('/api/posts/update/' . ResponseMessages::EXISTING_USER_POST_ID, [
+        $this->put('/api/posts/update/' . ResponseMessages::EXISTING_ADMIN_POST_ID, [
             'title' => ResponseMessages::NEW_ADMIN_POST_TITLE,
             'content' => ResponseMessages::NEW_ADMIN_POST_CONTENT,
-            'updatedAt' => Carbon::now(),
+
         ], $this->getAdminAuthClient());
-        $response = $this->response;
         $this->assertResponseOk();
         $this->assertResponse([
-            'id' => ResponseMessages::EXISTING_ADMIN_POST_ID,
-            'title' => ResponseMessages::NEW_ADMIN_POST_CONTENT,
-            'content' => ResponseMessages::NEW_ADMIN_POST_CONTENT,
-            'createdAt' => Carbon::now(),
-            'updatedAt' => Carbon::now(),
+            'id' => $this->response['id'],
+            'title' => $this->response['title'],
+            'content' => $this->response['content'],
+            'createdAt' => $this->response['createdAt'],
+            'updatedAt' => $this->response['updatedAt'],
         ]);
     }
-//
-//    public function testDelete()
-//    {
-//        //
-//    }
+
+    public function testDelete()
+    {
+        $this->delete('/api/posts/delete/' . ResponseMessages::EXISTING_ADMIN_POST_ID, $this->getAdminAuthClient());
+        $this->assertResponseOk();
+    }
 
 }

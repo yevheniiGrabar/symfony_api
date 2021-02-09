@@ -29,27 +29,21 @@ interface ResponseMessages
     public const CONTENT_IS_REQUIRED_MESSAGE = 'Content is required';
     public const CONTENT_IS_TOO_SHORT_MESSAGE = 'Content is too short';
     public const CONTENT_IS_TOO_LONG_MESSAGE = 'Content is too long';
-
-
     public const EXISTING_ADMIN_POST_ID = 1;
-    public const EXISTING_ADMIN_TITLE = 'Admin Post For Test';
-    public const EXISTING_ADMIN_CONTENT = 'Some Content for admin post';
-    public const ADMIN_POST_CREATED_AT = '2021-02-09 10:20:34';
-    public const ADMIN_POST_UPDATED_AT = '2021-02-09 10:35:08';
+    public const EXISTING_ADMIN_TITLE = 'Admin Post title';
+    public const EXISTING_ADMIN_CONTENT = 'Admin Post Content';
+    public const ADMIN_POST_CREATED_AT = '2021-02-09 16:00:00';
+    public const ADMIN_POST_UPDATED_AT = '2021-02-09 16:30:00';
     public const EXISTING_USER_POST_ID = 2;
-    public const EXISTING_USER_TITLE = 'User Post For Test';
-    public const EXISTING_USER_CONTENT = 'Some content for user post';
-    public const USER_POST_CREATED_AT = '2021-02-09 10:35:01';
-    public const USER_POST_UPDATED_AT = '2021-02-09 10:35:12';
+    public const EXISTING_USER_TITLE = 'User Post title';
+    public const EXISTING_USER_CONTENT = 'User Post Content';
+    public const USER_POST_CREATED_AT = '2021-02-09 13:09:49';
+    public const USER_POST_UPDATED_AT = '2021-02-09 13:14:07';
     public const NEW_USER_POST_TITLE = 'New User post title';
     public const NEW_USER_POST_CONTENT = 'New User post content';
-
+    public const NEW_ADMIN_POST_TITLE = 'New admin title';
+    public const NEW_ADMIN_POST_CONTENT = 'New admin content';
     public const USER_POST_SHORT_TITLE = 'T';
     public const USER_POST_SHORT_CONTENT = 'Test';
-
-
-
-
-
 }
 
