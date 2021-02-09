@@ -2,6 +2,7 @@
 
 namespace App\Tests\TestCases;
 
+use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -168,7 +169,7 @@ class FeatureTestCase extends WebTestCase
      */
     protected function assertResponse(array $expectedResponse): void
     {
-        $this->assertEquals($expectedResponse, $this->response);
+        static::assertEquals($expectedResponse, $this->response);
     }
 
     /**
@@ -176,12 +177,12 @@ class FeatureTestCase extends WebTestCase
      */
     protected function assertStatusCode(int $code): void
     {
-        $this->assertEquals($code, $this->statusCode);
+        static::assertEquals($code, $this->statusCode);
     }
 
     protected function assertResponseOk(): void
     {
-        $this->assertEquals(Response::HTTP_OK, $this->statusCode);
+        static::assertEquals(Response::HTTP_OK, $this->statusCode);
     }
 
     /**
