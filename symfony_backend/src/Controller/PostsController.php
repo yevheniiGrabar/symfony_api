@@ -19,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validation;
 
 /**
@@ -34,9 +35,8 @@ class PostsController extends AbstractController
 
     /** @var TokenStorageInterface */
     private TokenStorageInterface $storage;
-    /**
-     * @var RolesManager
-     */
+
+    /** @var RolesManager */
     private RolesManager $rolesManager;
 
     public function __construct
@@ -56,7 +56,6 @@ class PostsController extends AbstractController
     /**
      * @Route("/store", name="store", methods={"POST"})
      * @param Request $request
-     * @param TokenStorageInterface $storage
      * @return JsonResponse
      */
     public function storeAction(Request $request): JsonResponse
@@ -64,7 +63,7 @@ class PostsController extends AbstractController
         $title = (string)$request->get('title', '');
         $content = (string)$request->get('content', '');
 
-        $violations = self::validateUserPost($request);
+        $violations = self::validateUserPost($title, $content);
 
         if (count($violations) > 0) {
             return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -113,39 +112,33 @@ class PostsController extends AbstractController
      * @param int $id
      * @param Request $request
      * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function updateAction(int $id, Request $request): JsonResponse
     {
-        $user = $this->getCurrentUser();
-
-        if (!$user) {
-            return new JsonResponse
-            (['errors' => ResponseMessages::USER_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
-        }
-
         $post = $this->postRepository->find($id);
 
         if (!$post) {
             return new JsonResponse(['errors' => ResponseMessages::POST_NOT_FOUND_MESSAGE], Response::HTTP_NOT_FOUND);
         }
 
-        if (!$this->currentUserIsPostOwner($post)) {
+        if (!$this->currentUserIsPostOwner($post) && !$this->currentUserIsAdmin()) {
             return new JsonResponse(['errors' => ResponseMessages::ACCESS_DENIED_MESSAGE], Response::HTTP_FORBIDDEN);
-        }
-
-        $violations = self::validateUserPost($request);
-
-        if (count($violations) > 0) {
-            return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $title = (string)$request->get('title', '');
         $content = (string)$request->get('content', '');
 
+        $violations = self::validateUserPost($title, $content);
+
+        if (count($violations) > 0) {
+            return new JsonResponse(['errors' => (string)$violations], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         $post->setTitle($title);
         $post->setContent($content);
         $post->setUpdatedAt(Carbon::now());
-        $post->setUser($this->getCurrentUser());
 
         $this->postRepository->plush($post);
 
@@ -172,13 +165,12 @@ class PostsController extends AbstractController
         $deleted = $this->postRepository->delete($post);
 
         if (!$deleted) {
-            return new JsonResponse(
-                ['errors' => ResponseMessages::ENTITY_WAS_NOT_REMOVED_MESSAGE],
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+            $data = ['errors' => ResponseMessages::ENTITY_WAS_NOT_REMOVED_MESSAGE];
+
+            return new JsonResponse($data, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        return new JsonResponse(['message' => ResponseMessages::POST_DELETED_SUCCESSFULLY], Response::HTTP_OK);
+        return new JsonResponse(['message' => ResponseMessages::POST_DELETED_SUCCESSFULLY]);
     }
 
     /**
@@ -206,7 +198,6 @@ class PostsController extends AbstractController
     }
 
     /**
-     * @param User $user
      * @return bool
      * @throws ORMException
      * @throws OptimisticLockException
@@ -216,11 +207,15 @@ class PostsController extends AbstractController
         return $this->getCurrentUser()->getRole()->getId() == $this->rolesManager->isAdmin($this->getCurrentUser());
     }
 
-    private static function validateUserPost(Request $request)
+    /**
+     * @param Request $request
+     * @return ConstraintViolationListInterface
+     */
+    private static function validateUserPost($title, $content): ConstraintViolationListInterface
     {
         $validator = Validation::createValidator();
 
-        $violations = $validator->validate($request->get('title'), [
+        $violations = $validator->validate($title, [
             new NotBlank(['message' => ResponseMessages::TITLE_IS_REQUIRED_MESSAGE]),
             new Length([
                 'min' => 4,
@@ -230,17 +225,17 @@ class PostsController extends AbstractController
             ]),
         ]);
         $violations->addAll(
-            $validator->validate($request->get('content'), [
+            $validator->validate($content, [
                 new NotBlank(['message' => ResponseMessages::CONTENT_IS_REQUIRED_MESSAGE]),
                 new Length([
                     'min' => 10,
-                    'max' => 255,
+                    'max' => 50000,
                     'minMessage' => ResponseMessages::CONTENT_IS_TOO_SHORT_MESSAGE,
                     'maxMessage' => ResponseMessages::CONTENT_IS_TOO_LONG_MESSAGE,
                 ]),
             ])
         );
+
         return $violations;
     }
 }
-

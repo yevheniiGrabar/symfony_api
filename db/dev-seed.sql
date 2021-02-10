@@ -20,8 +20,9 @@ INSERT INTO `user` (`id`, `role_id`, `name`, `email`, `password`) VALUES
 (2, 2, 'user', 'user@email.com', '$2y$13$nYqiTj5R2UQZZDHs1JFF/e53n9LfNG1NLfr/Ji8IORcpy9z0UNdUe');
 
 INSERT INTO `post` (`id`, `user_id`, `title`, `content`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Admin Post title', 'Admin Post Content',  2021-02-08, 2021-02-09),
-(2, 2, 'User Post title', 'User Post Content', 2021-02-08, 2021-02-08);
+(1, 1, 'Admin Post title', 'Admin Post Content', '2021-02-10 10:39:47', '2021-02-10 10:39:47'),
+(2, 2, 'User Post title', 'User Post Content', '2021-02-10 10:40:17', '2021-02-10 10:40:17');
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

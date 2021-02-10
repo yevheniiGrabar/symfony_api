@@ -18,8 +18,8 @@ class AdminsApiTests extends FeatureTestCase
             'role_id' => 2
         ], $this->getAdminAuthClient());
         $this->assertResponseOk();
-        $this->assertArrayHasKey('id', $this->response);
-        $this->assertGreaterThan(0, $this->response);
+        self::assertArrayHasKey('id', $this->response);
+        self::assertGreaterThan(0, $this->response);
         unset($this->response['id']);
         $this->assertResponse([
             'name' => self::VALID_NAME,
@@ -37,9 +37,9 @@ class AdminsApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
             'role_id' => '-1'
         ], $this->getAdminAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(ResponseMessages::ROLE_IS_REQUIRED_MESSAGE, $this->response['errors']);
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::ROLE_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
     public function testAdminStoreIfInvalidName()
@@ -50,9 +50,9 @@ class AdminsApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
             'role_id' => '2'
         ], $this->getAdminAuthClient());
-        $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(ResponseMessages::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public function testAdminStoreIfExistingEmail()
@@ -63,11 +63,11 @@ class AdminsApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
             'role_id' => '2'
         ], $this->getAdminAuthClient());
-        $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(
             ResponseMessages::EMAIL_ALREADY_IN_USE_MESSAGE, $this->response['errors']
         );
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public function testAdminStoreIfWeakPassword()
@@ -78,18 +78,18 @@ class AdminsApiTests extends FeatureTestCase
             'password' => 'password',
             'role_id' => '2'
         ], $this->getAdminAuthClient());
-        $this->assertArrayHasKey('errors', $this->response);
-        $this->assertStringContainsString(
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(
             ResponseMessages::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
         );
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public function testAdminShow()
     {
         $this->get('/api/users/show/' . self::EXISTING_USER_ID, $this->getAdminAuthClient());
-        $this->assertResponseOk();
-        $this->assertResponse([
+        self::assertResponseOk();
+        self::assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::EXISTING_USER_NAME,
             'email' => self::EXISTING_USER_EMAIL,
@@ -105,8 +105,8 @@ class AdminsApiTests extends FeatureTestCase
             'password' => self::VALID_PASSWORD,
             'role_id' => '1'
         ], $this->getAdminAuthClient());
-        $this->assertResponseOk();
-        $this->assertResponse([
+        self::assertResponseOk();
+        self::assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::NEW_USER_NAME,
             'email' => self::NEW_USER_EMAIL,
@@ -117,7 +117,7 @@ class AdminsApiTests extends FeatureTestCase
     public function testAdminDelete()
     {
         $this->delete('/api/users/delete/' . self::EXISTING_USER_ID, $this->getAdminAuthClient());
-        $this->assertResponseOk();
+        self::assertResponseOk();
     }
 }
 

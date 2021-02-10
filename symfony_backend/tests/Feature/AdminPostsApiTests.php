@@ -73,15 +73,12 @@ class AdminPostsApiTests extends FeatureTestCase
 
     public function testShow()
     {
+        $currentDate = Carbon::now()->format('Y-m-d');
         $this->get('/api/posts/show/' . ResponseMessages::EXISTING_ADMIN_POST_ID, $this->getAdminAuthClient());
         $this->assertResponseOk();
-        $this->assertResponse([
-            'id' => ResponseMessages::EXISTING_ADMIN_POST_ID,
-            'title' => ResponseMessages::EXISTING_ADMIN_TITLE,
-            'content' => ResponseMessages::EXISTING_ADMIN_CONTENT,
-            'createdAt' => ResponseMessages::ADMIN_POST_CREATED_AT,
-            'updatedAt' => ResponseMessages::ADMIN_POST_UPDATED_AT,
-        ]);
+        $createdAt = Carbon::parse($this->response['createdAt']);
+        $createdAt = $createdAt->format('Y-m-d');
+        self::assertEquals($createdAt, $currentDate);
     }
 
     public function testUpdate()

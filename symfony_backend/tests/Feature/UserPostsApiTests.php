@@ -12,33 +12,57 @@ class UserPostsApiTests extends FeatureTestCase
     public function testStore()
     {
         $this->post('/api/posts/store', [
-            'title' => ResponseMessages::EXISTING_USER_TITLE,
-            'content' => ResponseMessages::EXISTING_USER_CONTENT,
+            'title' => ResponseMessages::NEW_USER_POST_TITLE,
+            'content' => ResponseMessages::NEW_USER_POST_CONTENT,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ], $this->getUserAuthClient());
 
+        $createdAtFromResponse = Carbon::parse($this->response['createdAt']);
+        $createdAt = $createdAtFromResponse->format('Y-m-d');
+        $currentDate = Carbon::now()->format('Y-m-d');
+
         self::assertArrayHasKey('id', $this->response);
+        self::assertArrayHasKey('createdAt', $this->response);
         self::assertGreaterThan(0, $this->response);
-        unset($this->response['id']);
-        $this->assertResponse([
-            'title' => ResponseMessages::EXISTING_USER_TITLE,
-            'content' => ResponseMessages::EXISTING_USER_CONTENT,
-            'createdAt' => Carbon::now(),
-            'updatedAt' => Carbon::now(),
-        ]);
+        //unset($this->response['id']);
+        self::assertEquals($createdAt, $currentDate);
     }
 
     public function testStoreIfShortTitle()
     {
         $this->post('/api/posts/store', [
-            'title' => '',
+            'title' => ResponseMessages::DEFAULT_POST_SHORT_TITLE,
             'content' => ResponseMessages::NEW_USER_POST_CONTENT,
+        ], $this->getUserAuthClient());
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::TITLE_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
+    }
+
+    public function testStoreIfShortContent()
+    {
+        $this->post('/api/posts/store', [
+            'title' => ResponseMessages::NEW_USER_POST_TITLE,
+            'content' => ResponseMessages::DEFAULT_POST_SHORT_CONTENT,
+        ], $this->getUserAuthClient());
+        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::CONTENT_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
+    }
+
+    public function testStoreWithoutTitle()
+    {
+        $this->post('/api/posts/store', [
+            'title' => '',
+            'content' => ResponseMessages::DEFAULT_POST_SHORT_CONTENT,
         ], $this->getUserAuthClient());
         $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertArrayHasKey('errors', $this->response);
         self::assertStringContainsString(ResponseMessages::TITLE_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
-    public function testStoreIfShortContent()
+    public function testStoreWithoutContent()
     {
         $this->post('/api/posts/store', [
             'title' => ResponseMessages::NEW_USER_POST_TITLE,
@@ -53,13 +77,11 @@ class UserPostsApiTests extends FeatureTestCase
     {
         $this->get('/api/posts/show/' . ResponseMessages::EXISTING_USER_POST_ID, $this->getUserAuthClient());
         $this->assertResponseOk();
-        $this->assertResponse([
-            'id' => ResponseMessages::EXISTING_USER_POST_ID,
-            'title' => ResponseMessages::EXISTING_USER_TITLE,
-            'content' => ResponseMessages::EXISTING_USER_CONTENT,
-            'createdAt' => ResponseMessages::USER_POST_CREATED_AT,
-            'updatedAt' => ResponseMessages::USER_POST_UPDATED_AT,
-        ]);
+        $createdAtFromResponse = Carbon::parse($this->response['createdAt']);
+        $createdAt = $createdAtFromResponse->format('Y-m-d');
+        $currentDate = Carbon::now()->format('Y-m-d');
+        self::assertArrayHasKey('createdAt', $this->response);
+        self::assertEquals($currentDate, $createdAt);
     }
 
     public function testShowAnotherPost()
@@ -73,19 +95,18 @@ class UserPostsApiTests extends FeatureTestCase
 
     public function testUpdate()
     {
+        $currentDate = Carbon::now()->format('Y-m-d');
+
         $this->put('/api/posts/update/' . ResponseMessages::EXISTING_USER_POST_ID, [
             'title' => ResponseMessages::NEW_USER_POST_TITLE,
             'content' => ResponseMessages::NEW_USER_POST_CONTENT,
-            'updatedAt' => ResponseMessages::USER_POST_UPDATED_AT,
+            'updatedAt' => $currentDate
         ], $this->getUserAuthClient());
         $this->assertResponseOk();
-        $this->assertResponse([
-            'id' => ResponseMessages::EXISTING_USER_POST_ID,
-            'title' => ResponseMessages::NEW_USER_POST_TITLE,
-            'content' => ResponseMessages::NEW_USER_POST_CONTENT,
-            'createdAt' => ResponseMessages::USER_POST_CREATED_AT,
-            'updatedAt' => Carbon::now(),
-        ]);
+        self::assertArrayHasKey('updatedAt', $this->response);
+        $formattedDate = Carbon::parse($this->response['updatedAt']);
+        $updatedAt = $formattedDate->format('Y-m-d');
+        self::assertEquals($currentDate, $updatedAt);
     }
 
     public function testUpdateIfShortTitle()
