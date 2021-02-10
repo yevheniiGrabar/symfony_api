@@ -34,7 +34,6 @@ class AdminPostsApiTests extends FeatureTestCase
         self::assertEquals(ResponseMessages::NEW_ADMIN_POST_CONTENT, $this->response['content']);
         self::assertEquals($currentDate, $createdAt);
         self::assertEquals($currentDate, $updatedAt);
-
     }
 
     public function testStoreIfShortTitle()

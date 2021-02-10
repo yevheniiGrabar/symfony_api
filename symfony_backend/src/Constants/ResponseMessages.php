@@ -45,6 +45,5 @@ interface ResponseMessages
     public const NEW_ADMIN_POST_CONTENT = 'New Post Content';
     public const DEFAULT_POST_SHORT_TITLE = 'T';
     public const DEFAULT_POST_SHORT_CONTENT = 'Test';
-
 }
 

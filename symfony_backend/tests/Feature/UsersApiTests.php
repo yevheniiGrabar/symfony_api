@@ -11,9 +11,9 @@ class UsersApiTests extends FeatureTestCase
     public function testStore(): void
     {
         $this->post('/api/users/store', [], $this->getUserAuthClient());
-        $this->assertStatusCode(Response::HTTP_FORBIDDEN);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(
+        self::assertStatusCode(Response::HTTP_FORBIDDEN);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(
             ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']
         );
     }
@@ -21,8 +21,8 @@ class UsersApiTests extends FeatureTestCase
     public function testShow(): void
     {
         $this->get('/api/users/show/' . self::EXISTING_USER_ID, $this->getUserAuthClient());
-        $this->assertResponseOk();
-        $this->assertResponse([
+        self::assertResponseOk();
+        self::assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::EXISTING_USER_NAME,
             'email' => self::EXISTING_USER_EMAIL,
@@ -37,8 +37,9 @@ class UsersApiTests extends FeatureTestCase
             'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
         ], $this->getUserAuthClient());
-        $this->assertResponseOk();
-        $this->assertResponse([
+
+        self::assertResponseOk();
+        self::assertResponse([
             'id' => self::EXISTING_USER_ID,
             'name' => self::NEW_USER_NAME,
             'email' => self::NEW_USER_EMAIL,
@@ -53,9 +54,10 @@ class UsersApiTests extends FeatureTestCase
             'email' => self::EXISTING_ADMIN_EMAIL,
             'password' => self::VALID_PASSWORD,
         ], $this->getUserAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(
             ResponseMessages::EMAIL_ALREADY_IN_USE_MESSAGE, $this->response['errors']
         );
     }
@@ -67,9 +69,10 @@ class UsersApiTests extends FeatureTestCase
             'email' => self::NEW_USER_EMAIL,
             'password' => self::WEAK_PASSWORD,
         ], $this->getUserAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(
             ResponseMessages::PASSWORD_IS_COMPROMISED_MESSAGE, $this->response['errors']
         );
     }
@@ -81,9 +84,10 @@ class UsersApiTests extends FeatureTestCase
             'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
         ], $this->getUserAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::NAME_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateWithoutName()
@@ -93,9 +97,10 @@ class UsersApiTests extends FeatureTestCase
             'email' => self::NEW_USER_EMAIL,
             'password' => self::VALID_PASSWORD,
         ], $this->getUserAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::NAME_IS_REQUIRE_MESSAGE, $this->response['errors']);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::NAME_IS_REQUIRE_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateWithoutEmail()
@@ -105,9 +110,10 @@ class UsersApiTests extends FeatureTestCase
             'email' => '',
             'password' => self::VALID_PASSWORD,
         ], $this->getUserAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::EMAIL_IS_REQUIRED_MESSAGE, $this->response['errors']);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::EMAIL_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateWithoutPassword()
@@ -117,43 +123,43 @@ class UsersApiTests extends FeatureTestCase
             'email' => self::NEW_USER_EMAIL,
             'password' => '',
         ], $this->getUserAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::PASSWORD_IS_REQUIRED_MESSAGE, $this->response['errors']);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::PASSWORD_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
     public function testDelete(): void
     {
         $this->delete('/api/users/delete/' . self::EXISTING_USER_ID, $this->getUserAuthClient());
-        $this->assertResponseOk();
+        self::assertResponseOk();
     }
 
     public function testShowAnotherUser()
     {
         $this->getUserAuthClient();
         $this->get('/api/users/show/' . self::EXISTING_ADMIN_ID, $this->getUserAuthClient());
-        $this->assertStatusCode(Response::HTTP_FORBIDDEN);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']);
-
+        self::assertStatusCode(Response::HTTP_FORBIDDEN);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateAnotherUser()
     {
         $this->getUserAuthClient();
         $this->put('/api/users/update/' . self::EXISTING_ADMIN_ID, [], $this->getUserAuthClient());
-        $this->assertStatusCode(Response::HTTP_FORBIDDEN);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']);
+        self::assertStatusCode(Response::HTTP_FORBIDDEN);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']);
     }
 
     public function testDeleteAnotherUser()
     {
         $this->getUserAuthClient();
         $this->delete('/api/users/delete/' . self::EXISTING_ADMIN_ID,);
-        $this->assertStatusCode(Response::HTTP_FORBIDDEN);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']);
+        self::assertStatusCode(Response::HTTP_FORBIDDEN);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::ACCESS_DENIED_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateIfAdminRole()
@@ -170,6 +176,6 @@ class UsersApiTests extends FeatureTestCase
             'role_id' => 1,
         ], $this->getUserAuthClient());
         $response = $this->response;
-        static::assertFalse($response['isAdmin']);
+        self::assertFalse($response['isAdmin']);
     }
 }
