@@ -72,8 +72,6 @@ class PostsController extends AbstractController
         $post = new Post();
         $post->setTitle($title);
         $post->setContent($content);
-        $post->setCreatedAt(Carbon::now());
-        $post->setUpdatedAt(Carbon::now());
         $post->setUser($this->getCurrentUser());
 
         $this->postRepository->plush($post);

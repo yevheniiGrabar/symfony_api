@@ -31,12 +31,12 @@ class Post implements EntityInterface
     private string $content;
 
     /**
-     * @ORM\Column(type="datetime", options={"default"="CURRENT_TIMESTAMP"}, name="created_at")
+     * @ORM\Column(type="datetime", options={"default"="CURRENT_TIMESTAMP"}, name="created_at", nullable=true)
      */
     private DateTimeInterface $createdAt;
 
     /**
-     * @ORM\Column(type="datetime",options={"default"="CURRENT_TIMESTAMP"}, name="updated_at")
+     * @ORM\Column(type="datetime",options={"default"="CURRENT_TIMESTAMP"}, name="updated_at", nullable=true)
      */
     private DateTimeInterface $updatedAt;
 
@@ -46,6 +46,12 @@ class Post implements EntityInterface
      * @var User
      */
     private User $user;
+
+    public function __construct()
+    {
+        $this->createdAt = Carbon::now();
+        $this->updatedAt = Carbon::now();
+    }
 
     /**
      * @return int
