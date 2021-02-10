@@ -12,19 +12,29 @@ class AdminPostsApiTests extends FeatureTestCase
     public function testStore()
     {
         $this->post('/api/posts/store', [
-            'title' => ResponseMessages::EXISTING_ADMIN_TITLE,
-            'content' => ResponseMessages::EXISTING_ADMIN_CONTENT,
+            'title' => ResponseMessages::NEW_ADMIN_POST_TITLE,
+            'content' => ResponseMessages::NEW_ADMIN_POST_CONTENT,
         ], $this->getAdminAuthClient());
 
+        self::assertResponseOk();
         self::assertArrayHasKey('id', $this->response);
-        self::assertGreaterThan(0, $this->response);
-        unset($this->response['id']);
-        $this->assertResponse([
-            'title' => $this->response['title'],
-            'content' => $this->response['content'],
-            'createdAt' => $this->response['createdAt'],
-            'updatedAt' => $this->response['updatedAt'],
-        ]);
+        self::assertGreaterThan(0, $this->response['id']);
+        self::assertArrayHasKey('title', $this->response);
+        self::assertArrayHasKey('content', $this->response);
+        self::assertArrayHasKey('createdAt', $this->response);
+        self::assertArrayHasKey('updatedAt', $this->response);
+
+        $createdAtFromResponse = Carbon::parse($this->response['createdAt']);
+        $createdAt = $createdAtFromResponse->format('Y-m-d');
+        $updatedAtFromResponse = Carbon::parse($this->response['updatedAt']);
+        $updatedAt = $updatedAtFromResponse->format('Y-m-d');
+        $currentDate = Carbon::now()->format('Y-m-d');
+
+        self::assertEquals(ResponseMessages::NEW_ADMIN_POST_TITLE, $this->response['title']);
+        self::assertEquals(ResponseMessages::NEW_ADMIN_POST_CONTENT, $this->response['content']);
+        self::assertEquals($currentDate, $createdAt);
+        self::assertEquals($currentDate, $updatedAt);
+
     }
 
     public function testStoreIfShortTitle()
@@ -33,7 +43,8 @@ class AdminPostsApiTests extends FeatureTestCase
             'title' => ResponseMessages::DEFAULT_POST_SHORT_TITLE,
             'content' => ResponseMessages::NEW_ADMIN_POST_CONTENT,
         ], $this->getAdminAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertArrayHasKey('errors', $this->response);
         self::assertStringContainsString(ResponseMessages::TITLE_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
     }
@@ -44,7 +55,8 @@ class AdminPostsApiTests extends FeatureTestCase
             'title' => ResponseMessages::NEW_ADMIN_POST_CONTENT,
             'content' => ResponseMessages::DEFAULT_POST_SHORT_CONTENT,
         ], $this->getAdminAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertArrayHasKey('errors', $this->response);
         self::assertStringContainsString(ResponseMessages::CONTENT_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
     }
@@ -55,7 +67,8 @@ class AdminPostsApiTests extends FeatureTestCase
             'title' => '',
             'content' => ResponseMessages::NEW_ADMIN_POST_CONTENT,
         ], $this->getAdminAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertArrayHasKey('errors', $this->response);
         self::assertStringContainsString(ResponseMessages::TITLE_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
@@ -66,19 +79,34 @@ class AdminPostsApiTests extends FeatureTestCase
             'title' => ResponseMessages::NEW_ADMIN_POST_CONTENT,
             'content' => '',
         ], $this->getAdminAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertArrayHasKey('errors', $this->response);
         self::assertStringContainsString(ResponseMessages::CONTENT_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
     public function testShow()
     {
-        $currentDate = Carbon::now()->format('Y-m-d');
         $this->get('/api/posts/show/' . ResponseMessages::EXISTING_ADMIN_POST_ID, $this->getAdminAuthClient());
-        $this->assertResponseOk();
-        $createdAt = Carbon::parse($this->response['createdAt']);
-        $createdAt = $createdAt->format('Y-m-d');
-        self::assertEquals($createdAt, $currentDate);
+
+        self::assertResponseOk();
+        self::assertArrayHasKey('id', $this->response);
+        self::assertArrayHasKey('title', $this->response);
+        self::assertArrayHasKey('content', $this->response);
+        self::assertArrayHasKey('createdAt', $this->response);
+        self::assertArrayHasKey('updatedAt', $this->response);
+
+        $createdAtFromResponse = Carbon::parse($this->response['createdAt']);
+        $updatedAtFromResponse = Carbon::parse($this->response['updatedAt']);
+        $createdAt = $createdAtFromResponse->format('Y-m-d');
+        $updatedAt = $updatedAtFromResponse->format('Y-m-d');
+        $currentDate = Carbon::now()->format('Y-m-d');
+
+        self::assertEquals(ResponseMessages::EXISTING_ADMIN_POST_ID, $this->response['id']);
+        self::assertEquals(ResponseMessages::EXISTING_ADMIN_TITLE, $this->response['title']);
+        self::assertEquals(ResponseMessages::EXISTING_ADMIN_CONTENT, $this->response['content']);
+        self::assertEquals($currentDate, $createdAt);
+        self::assertEquals($currentDate, $updatedAt);
     }
 
     public function testUpdate()
@@ -88,14 +116,26 @@ class AdminPostsApiTests extends FeatureTestCase
             'content' => ResponseMessages::NEW_ADMIN_POST_CONTENT,
 
         ], $this->getAdminAuthClient());
-        $this->assertResponseOk();
-        $this->assertResponse([
-            'id' => $this->response['id'],
-            'title' => $this->response['title'],
-            'content' => $this->response['content'],
-            'createdAt' => $this->response['createdAt'],
-            'updatedAt' => $this->response['updatedAt'],
-        ]);
+
+        self::assertResponseOk();
+        self::assertArrayHasKey('id', $this->response);
+        self::assertArrayHasKey('title', $this->response);
+        self::assertArrayHasKey('content', $this->response);
+        self::assertArrayHasKey('createdAt', $this->response);
+        self::assertArrayHasKey('updatedAt', $this->response);
+
+
+        $createdAtFromResponse = Carbon::parse($this->response['createdAt']);
+        $updatedAtFromResponse = Carbon::parse($this->response['updatedAt']);
+        $createdAt = $createdAtFromResponse->format('Y-m-d');
+        $updatedAt = $updatedAtFromResponse->format('Y-m-d');
+        $currentDate = Carbon::now()->format('Y-m-d');
+
+        self::assertEquals(ResponseMessages::EXISTING_ADMIN_POST_ID, $this->response['id']);
+        self::assertEquals(ResponseMessages::NEW_ADMIN_POST_TITLE, $this->response['title']);
+        self::assertEquals(ResponseMessages::NEW_ADMIN_POST_CONTENT, $this->response['content']);
+        self::assertEquals($currentDate, $createdAt);
+        self::assertEquals($currentDate, $updatedAt);
     }
 
     public function testUpdateIfShortTitle()
@@ -103,11 +143,11 @@ class AdminPostsApiTests extends FeatureTestCase
         $this->put('/api/posts/update/' . ResponseMessages::EXISTING_ADMIN_POST_ID, [
             'title' => ResponseMessages::DEFAULT_POST_SHORT_TITLE,
             'content' => ResponseMessages::EXISTING_ADMIN_CONTENT,
-            'updatedAt' => Carbon::now(),
         ], $this->getAdminAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::TITLE_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::TITLE_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateIfShortContent()
@@ -115,11 +155,11 @@ class AdminPostsApiTests extends FeatureTestCase
         $this->put('/api/posts/update/' . ResponseMessages::EXISTING_ADMIN_POST_ID, [
             'title' => ResponseMessages::EXISTING_ADMIN_TITLE,
             'content' => ResponseMessages::DEFAULT_POST_SHORT_CONTENT,
-            'updatedAt' => Carbon::now(),
         ], $this->getAdminAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::CONTENT_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::CONTENT_IS_TOO_SHORT_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateWithoutTitle()
@@ -127,11 +167,10 @@ class AdminPostsApiTests extends FeatureTestCase
         $this->put('/api/posts/update/' . ResponseMessages::EXISTING_ADMIN_POST_ID, [
             'title' => '',
             'content' => ResponseMessages::EXISTING_ADMIN_CONTENT,
-            'updatedAt' => Carbon::now(),
         ], $this->getAdminAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::TITLE_IS_REQUIRED_MESSAGE, $this->response['errors']);
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::TITLE_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
     public function testUpdateWithoutContent()
@@ -141,14 +180,15 @@ class AdminPostsApiTests extends FeatureTestCase
             'content' => '',
             'updatedAt' => Carbon::now(),
         ], $this->getAdminAuthClient());
-        $this->assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
-        static::assertArrayHasKey('errors', $this->response);
-        static::assertStringContainsString(ResponseMessages::CONTENT_IS_REQUIRED_MESSAGE, $this->response['errors']);
+
+        self::assertStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertArrayHasKey('errors', $this->response);
+        self::assertStringContainsString(ResponseMessages::CONTENT_IS_REQUIRED_MESSAGE, $this->response['errors']);
     }
 
     public function testDelete()
     {
         $this->delete('/api/posts/delete/' . ResponseMessages::EXISTING_ADMIN_POST_ID, $this->getAdminAuthClient());
-        $this->assertResponseOk();
+        self::assertResponseOk();
     }
 }
